@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#003366]/5 to-white dark:from-[#003366]/10 dark:to-[#0a0a0a]">
@@ -56,25 +57,29 @@ export default function LoginPage() {
               </div>
 
               <div className="text-sm">
-                <a href="/forgot-password" className="font-medium text-[#003366] hover:text-[#003366]/80 dark:text-[#ffcc66] dark:hover:text-[#ffcc66]/80">
+                <a href="/publics/forgot-password" className="font-medium text-[#003366] hover:text-[#003366]/80 dark:text-[#ffcc66] dark:hover:text-[#ffcc66]/80">
                   Mot de passe oublié?
                 </a>
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-[#ffcc66] to-[#ffcc66]/90 hover:from-[#ffcc66]/90 hover:to-[#ffcc66] text-[#003366] py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 font-medium mt-4"
+            <Link
+            href="/master/dashboard"
+            className="block w-full text-center bg-gradient-to-r from-[#ffcc66] to-[#ffcc66]/90 
+                        hover:from-[#ffcc66]/90 hover:to-[#ffcc66] 
+                        text-[#003366] py-3 rounded-lg shadow-md hover:shadow-lg 
+                        transition-all duration-300 font-medium mt-4"
             >
-              Se connecter
-            </button>
+            Se connecter
+            </Link>
+
           </div>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Pas encore de compte?{' '}
-            <a href="/signup" className="text-[#003366] dark:text-[#ffcc66] font-medium hover:underline">
+            <a href="/publics/signup" className="text-[#003366] dark:text-[#ffcc66] font-medium hover:underline">
               Créer une église
             </a>
           </p>

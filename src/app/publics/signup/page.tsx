@@ -65,7 +65,7 @@ export default function SignupPage() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Déjà un compte?{' '}
-            <a href="/login" className="text-[#003366] dark:text-[#ffcc66] font-medium hover:underline">
+            <a href="/publics/login" className="text-[#003366] dark:text-[#ffcc66] font-medium hover:underline">
               Se connecter
             </a>
           </p>
