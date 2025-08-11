@@ -21,13 +21,13 @@ export default function HomePage() {
         
         <div className="mt-12 flex flex-col sm:flex-row justify-center gap-4">
           <a 
-            href="/signup" 
+            href="/publics/signup" 
             className="bg-[#003366] hover:bg-[#003366]/90 text-white px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-medium hover:-translate-y-0.5"
           >
             Créer une église
           </a>
           <a 
-            href="/login" 
+            href="/publics/login" 
             className="bg-[#ffcc66] hover:bg-[#ffcc66]/90 text-[#003366] px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 font-medium border border-[#ffcc66] hover:-translate-y-0.5"
           >
             Se connecter
