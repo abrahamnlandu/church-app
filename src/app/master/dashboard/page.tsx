@@ -165,7 +165,7 @@ export default function DashboardHomePage() {
 
           <div className="flex items-center gap-3">
             <Link
-              href={`/${church.slug}`}
+              href={`https://yambopeto.com/`}
               className="px-4 py-2 rounded-lg border text-sm font-medium transition-colors shadow-sm flex items-center gap-2
                          border-gray-300 hover:bg-gray-50
                          dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
@@ -196,23 +196,23 @@ export default function DashboardHomePage() {
         >
           <QuickAction
             title="Ajouter un sermon"
-            href={`/dashboard/${church.id}/content?tab=sermons`}
+            href={`/master/dashboard/sermons`}
             badge="Nouveau"
             accent={church.colors?.primary}
             icon="📖"
           />
           <QuickAction
             title="Programmer un culte"
-            href={`/dashboard/${church.id}/content?tab=events`}
+            href={`/master/dashboard/programmes`}
             accent={church.colors?.primary}
             icon="📅"
           />
           <QuickAction
             title="Publier une annonce"
-            href={`/dashboard/${church.id}/content?tab=announcements`}
+            href={`/master/dashboard/announcements`}
             icon="📢"
           />
-          <QuickAction title="Gérer la page" href={`/${church.slug}`} targetBlank icon="⚙️" />
+          <QuickAction title="Gérer la page" href={`/master/dashboard/settings`} targetBlank icon="⚙️" />
         </motion.section>
 
         {/* Statistiques */}
@@ -269,7 +269,7 @@ export default function DashboardHomePage() {
               </ul>
               <div className="mt-4 text-right">
                 <Link
-                  href={`/dashboard/${church.id}/content?tab=events`}
+                  href={`/master/dashboard/programmes`}
                   className="text-sm font-medium inline-flex items-center gap-1 hover:text-blue-600 transition-colors"
                   style={{ color: church.colors?.primary }}
                 >
@@ -384,7 +384,7 @@ export default function DashboardHomePage() {
               <ThemePreview primary={church.colors?.primary} secondary={church.colors?.secondary} />
               <div className="mt-4 text-right">
                 <Link
-                  href={`/dashboard/${church.id}/settings`}
+                  href={`/master/dashboard/settings`}
                   className="px-4 py-2 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all inline-flex items-center gap-2"
                   style={{ backgroundColor: church.colors?.primary, boxShadow: `0 4px 14px -2px ${church.colors?.primary}80` }}
                 >
