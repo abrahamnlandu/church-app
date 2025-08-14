@@ -1,15 +1,16 @@
-// app/master/dashboard/page.tsx
+// app/master/dashboard/finances/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiHome, FiCalendar, FiBook, FiMic, FiBell, FiUsers, FiDollarSign, FiSettings, FiLogOut, FiUser, FiChevronDown, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiCalendar, FiBook, FiMic, FiBell, FiUsers, FiDollarSign, FiSettings, FiLogOut, FiUser, FiChevronDown, FiMenu, FiX, FiPlus, FiFilter, FiDownload } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function DashboardPage() {
+export default function FinancesPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
   const pathname = usePathname();
 
   const navItems = [
@@ -23,10 +24,30 @@ export default function DashboardPage() {
     { name: 'Paramètres', icon: <FiSettings />, path: '/master/dashboard/settings' },
   ];
 
+  // Données de démonstration
+  const financeStats = [
+    { type: 'total', title: 'Total des dons', amount: 12540, change: '+12%', color: 'purple' },
+    { type: 'tithe', title: 'Dîmes', amount: 7540, change: '+8%', color: 'blue' },
+    { type: 'offering', title: 'Offrandes', amount: 3250, change: '+15%', color: 'green' },
+    { type: 'building', title: 'Fonds construction', amount: 1750, change: '+25%', color: 'orange' },
+  ];
+
+  const transactions = [
+    { id: 1, type: 'tithe', member: 'John Doe', amount: 150, date: '15/06/2023', method: 'Espèces' },
+    { id: 2, type: 'offering', member: 'Alice Smith', amount: 75, date: '14/06/2023', method: 'Mobile Money' },
+    { id: 3, type: 'building', member: 'Robert Johnson', amount: 200, date: '12/06/2023', method: 'Banque' },
+    { id: 4, type: 'other', member: 'Maria Garcia', amount: 50, date: '11/06/2023', method: 'Espèces' },
+    { id: 5, type: 'tithe', member: 'David Kim', amount: 120, date: '10/06/2023', method: 'Mobile Money' },
+  ];
+
   const handleLogout = () => {
     console.log('Déconnexion effectuée');
     // Ajoutez ici votre logique de déconnexion
   };
+
+  const filteredTransactions = activeTab === 'all' 
+    ? transactions 
+    : transactions.filter(t => t.type === activeTab);
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -138,9 +159,7 @@ export default function DashboardPage() {
             </button>
 
             <div className="flex-1 md:ml-6">
-              <h1 className="text-xl font-semibold">
-                {navItems.find((item) => item.path === pathname)?.name || 'Tableau de bord'}
-              </h1>
+              <h1 className="text-xl font-semibold">Finances</h1>
             </div>
 
             <div className="relative">
@@ -176,10 +195,6 @@ export default function DashboardPage() {
                         <FiUser className="mr-2" />
                         Mon profil
                       </Link>
-                      <Link
-                        href="/master/dashboard/profile"
-                        className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                      >
                       <button
                         onClick={handleLogout}
                         className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-red-600 dark:text-red-400"
@@ -187,7 +202,6 @@ export default function DashboardPage() {
                         <FiLogOut className="mr-2" />
                         Déconnexion
                       </button>
-                      </Link>
                     </div>
                   </motion.div>
                 )}
@@ -199,100 +213,153 @@ export default function DashboardPage() {
         {/* Contenu */}
         <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900">
           <div className="max-w-7xl mx-auto">
+            {/* En-tête et actions */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <div>
+                <h2 className="text-2xl font-bold">Gestion des finances</h2>
+                <p className="text-gray-500 dark:text-gray-400">Suivi des dons et offrandes</p>
+              </div>
+              <div className="flex gap-3">
+                <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <FiFilter />
+                  <span>Filtrer</span>
+                </button>
+                <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <FiDownload />
+                  <span>Exporter</span>
+                </button>
+                <Link 
+                  href="/master/dashboard/finances/new" 
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <FiPlus />
+                  <span>Nouveau don</span>
+                </Link>
+              </div>
+            </div>
+
             {/* Statistiques */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <StatCard 
-                title="Membres actifs" 
-                value="1,248" 
-                change="+12% ce mois" 
-                icon={<FiUsers className="text-blue-600 dark:text-blue-400" />} 
-                color="blue" 
-              />
-              <StatCard 
-                title="Événements" 
-                value="24" 
-                change="3 à venir" 
-                icon={<FiCalendar className="text-green-600 dark:text-green-400" />} 
-                color="green" 
-              />
-              <StatCard 
-                title="Dons totaux" 
-                value="$8,420" 
-                change="+5% ce mois" 
-                icon={<FiDollarSign className="text-purple-600 dark:text-purple-400" />} 
-                color="purple" 
-              />
-              <StatCard 
-                title="Sermons" 
-                value="156" 
-                change="+3 nouveaux" 
-                icon={<FiBook className="text-orange-600 dark:text-orange-400" />} 
-                color="orange" 
-              />
+              {financeStats.map((stat) => (
+                <StatCard 
+                  key={stat.type}
+                  title={stat.title}
+                  value={`$${stat.amount.toLocaleString()}`}
+                  change={stat.change}
+                  icon={<FiDollarSign />}
+                  color={stat.color}
+                />
+              ))}
             </div>
 
-            {/* Graphiques et tableaux */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-lg font-semibold">Activité récente</h2>
-                  <select className="bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1 text-sm">
-                    <option>7 derniers jours</option>
-                    <option>30 derniers jours</option>
-                    <option>Cette année</option>
-                  </select>
-                </div>
-                <div className="h-64 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <p className="text-gray-500 dark:text-gray-400">Graphique d'activité</p>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h2 className="text-lg font-semibold mb-6">Prochains événements</h2>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((item) => (
-                    <div key={item} className="flex items-start space-x-3">
-                      <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 p-2 rounded-lg">
-                        <FiCalendar />
-                      </div>
-                      <div>
-                        <p className="font-medium">Culte dominical</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Dimanche, 9h00</p>
-                      </div>
-                    </div>
-                  ))}
-                  <button className="w-full mt-4 text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-center">
-                    Voir tous les événements
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Derniers sermons */}
+            {/* Graphique */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold">Derniers sermons</h2>
-                <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                  Voir tous
-                </button>
+                <h2 className="text-lg font-semibold">Évolution des dons</h2>
+                <select className="bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1 text-sm">
+                  <option>7 derniers jours</option>
+                  <option>30 derniers jours</option>
+                  <option>Cette année</option>
+                </select>
               </div>
+              <div className="h-64 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                <p className="text-gray-500 dark:text-gray-400">Graphique des dons</p>
+              </div>
+            </div>
+
+            {/* Onglets */}
+            <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+              <nav className="flex space-x-6">
+                <button
+                  onClick={() => setActiveTab('all')}
+                  className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'all'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  Tous les dons
+                </button>
+                <button
+                  onClick={() => setActiveTab('tithe')}
+                  className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'tithe'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  Dîmes
+                </button>
+                <button
+                  onClick={() => setActiveTab('offering')}
+                  className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'offering'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  Offrandes
+                </button>
+                <button
+                  onClick={() => setActiveTab('building')}
+                  className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'building'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  Construction
+                </button>
+                <button
+                  onClick={() => setActiveTab('other')}
+                  className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'other'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  Autres
+                </button>
+              </nav>
+            </div>
+
+            {/* Tableau des transactions */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead>
+                  <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Titre</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Prédicateur</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Membre</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Montant</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Méthode</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {[1, 2, 3].map((item) => (
-                      <tr key={item} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">La puissance de la foi</td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Pasteur John Doe</td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">12 juin 2023</td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm">
+                    {filteredTransactions.map((transaction) => (
+                      <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{transaction.member}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            transaction.type === 'tithe' 
+                              ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-400'
+                              : transaction.type === 'offering'
+                              ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-400'
+                              : transaction.type === 'building'
+                              ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-400'
+                              : 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-400'
+                          }`}>
+                            {transaction.type === 'tithe' ? 'Dîme' : 
+                             transaction.type === 'offering' ? 'Offrande' : 
+                             transaction.type === 'building' ? 'Construction' : 'Autre'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">${transaction.amount}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{transaction.date}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{transaction.method}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                           <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mr-3">
                             Éditer
                           </button>
@@ -305,43 +372,16 @@ export default function DashboardPage() {
                   </tbody>
                 </table>
               </div>
-            </div>
-
-            {/* Annonces */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h2 className="text-lg font-semibold mb-6">Annonces récentes</h2>
-                <div className="space-y-4">
-                  {[1, 2].map((item) => (
-                    <div key={item} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-sm transition-shadow">
-                      <h3 className="font-medium mb-1">Collecte spéciale</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Pour la construction du nouveau bâtiment</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">Publié le 15 juin 2023</p>
-                    </div>
-                  ))}
-                  <button className="w-full mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-center">
-                    Voir toutes les annonces
-                  </button>
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Affichage de <span className="font-medium">1</span> à <span className="font-medium">5</span> sur <span className="font-medium">25</span> dons
                 </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h2 className="text-lg font-semibold mb-6">Activité des membres</h2>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((item) => (
-                    <div key={item} className="flex items-center space-x-3">
-                      <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        <FiUser className="text-gray-600 dark:text-gray-300" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">John Doe</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">a rejoint un groupe</p>
-                      </div>
-                      <div className="ml-auto text-xs text-gray-400 dark:text-gray-500">2h</div>
-                    </div>
-                  ))}
-                  <button className="w-full mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-center">
-                    Voir toute l'activité
+                <div className="flex space-x-2">
+                  <button className="px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-md text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    Précédent
+                  </button>
+                  <button className="px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-md text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    Suivant
                   </button>
                 </div>
               </div>

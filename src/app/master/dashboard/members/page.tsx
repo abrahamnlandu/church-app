@@ -1,4 +1,4 @@
-// app/master/dashboard/sermons/page.tsx
+// app/master/dashboard/members/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -7,11 +7,11 @@ import { usePathname } from 'next/navigation';
 import { 
   FiHome, FiCalendar, FiBook, FiMic, FiBell, FiUsers, FiDollarSign, FiSettings, 
   FiLogOut, FiUser, FiChevronDown, FiMenu, FiX, FiPlus, FiSearch, FiEdit, 
-  FiTrash2, FiFilter, FiDownload, FiPrinter, FiFileText, FiBookOpen, FiUpload, FiMapPin, FiClock
+  FiTrash2, FiFilter, FiDownload, FiPrinter, FiPhone, FiMail, FiMapPin 
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function SermonsPage() {
+export default function MembersPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -20,78 +20,84 @@ export default function SermonsPage() {
   const pathname = usePathname();
 
   // État pour le formulaire d'ajout
-  const [newSermon, setNewSermon] = useState({
-    title: '',
-    author: '',
-    location: '',
-    date: new Date().toISOString().split('T')[0],
-    time: 'morning',
-    content: '',
-    tags: [] as string[],
-    file: null as File | null
+  const [newMember, setNewMember] = useState({
+    firstName: '',
+    lastName: '',
+    gender: 'male',
+    birthDate: '',
+    phone: '',
+    email: '',
+    address: '',
+    memberSince: new Date().toISOString().split('T')[0],
+    status: 'active'
   });
 
-  // Données fictives des sermons
-  const [sermons, setSermons] = useState([
+  // Données fictives des membres
+  const [members, setMembers] = useState([
     {
       id: 1,
-      title: 'La puissance de la résurrection',
-      author: 'Pasteur Jean Kabasele',
-      location: 'Centre Missionnaire de Binza',
-      date: '2023-04-16',
-      time: 'morning',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Résurrection', 'Pâques'],
-      downloads: 124,
-      fileType: 'PDF'
+      firstName: 'Jean',
+      lastName: 'Dupont',
+      gender: 'male',
+      birthDate: '1985-04-12',
+      phone: '+243 81 234 5678',
+      email: 'jean.dupont@example.com',
+      address: '123 Avenue de l\'Église, Binza',
+      memberSince: '2020-01-15',
+      status: 'active',
+      groups: ['Chœur', 'École du Dimanche']
     },
     {
       id: 2,
-      title: 'Vivre par la foi',
-      author: 'Apôtre David Mbaya',
-      location: 'Convention Nationale',
-      date: '2023-03-05',
-      time: 'evening',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Foi', 'Persévérance'],
-      downloads: 89,
-      fileType: 'DOCX'
+      firstName: 'Marie',
+      lastName: 'Kabasele',
+      gender: 'female',
+      birthDate: '1992-08-25',
+      phone: '+243 89 876 5432',
+      email: 'marie.kab@example.com',
+      address: '456 Rue de la Foi, Gombe',
+      memberSince: '2019-05-20',
+      status: 'active',
+      groups: ['Femmes de foi', 'Intercession']
     },
     {
       id: 3,
-      title: 'Les clés du succès spirituel',
-      author: 'Prophète Samuel Lukusa',
-      location: 'Retraite des leaders',
-      date: '2023-02-12',
-      time: 'morning',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Succès', 'Spiritualité'],
-      downloads: 156,
-      fileType: 'PDF'
+      firstName: 'Paul',
+      lastName: 'Mbuyi',
+      gender: 'male',
+      birthDate: '1978-11-03',
+      phone: '+243 82 345 6789',
+      email: 'paul.mbuyi@example.com',
+      address: '789 Boulevard de l\'Espérance, Limete',
+      memberSince: '2018-03-10',
+      status: 'inactive',
+      groups: ['Anciens', 'Enseignants']
     },
     {
       id: 4,
-      title: 'La grâce suffisante',
-      author: 'Dr. Paul Mukendi',
-      location: 'Université Biblique',
-      date: '2023-01-08',
-      time: 'evening',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Grâce', 'Salut'],
-      downloads: 72,
-      fileType: 'PDF'
+      firstName: 'Sarah',
+      lastName: 'Ngoma',
+      gender: 'female',
+      birthDate: '1995-07-19',
+      phone: '+243 81 111 2222',
+      email: 'sarah.ngoma@example.com',
+      address: '321 Allée de la Paix, Bandal',
+      memberSince: '2021-02-28',
+      status: 'active',
+      groups: ['Jeunes adultes', 'Danse']
     },
     {
       id: 5,
-      title: 'Le réveil de l\'Église',
-      author: 'Évangéliste Sarah Ngalula',
-      location: 'Campagne d\'évangélisation',
-      date: '2022-12-25',
-      time: 'morning',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Réveil', 'Évangélisation'],
-      downloads: 203,
-      fileType: 'VIDEO'
+      firstName: 'David',
+      lastName: 'Luboya',
+      gender: 'male',
+      birthDate: '1982-12-30',
+      phone: '+243 84 555 6666',
+      email: 'david.luboya@example.com',
+      address: '654 Chemin de la Grâce, Ngaliema',
+      memberSince: '2017-09-05',
+      status: 'pending',
+      groups: ['Pasteurs', 'Direction']
     }
   ]);
 
@@ -111,86 +117,73 @@ export default function SermonsPage() {
     // Ajoutez ici votre logique de déconnexion
   };
 
-  const handleAddSermon = (e: React.FormEvent) => {
+  const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
-    const newId = sermons.length > 0 ? Math.max(...sermons.map(s => s.id)) + 1 : 1;
+    const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
     
-    setSermons([
-      ...sermons,
+    setMembers([
+      ...members,
       {
         id: newId,
-        ...newSermon,
-        downloads: 0,
-        fileType: newSermon.file?.name.split('.').pop()?.toUpperCase() || 'PDF'
+        ...newMember,
+        groups: []
       }
     ]);
     
     // Réinitialiser le formulaire
-    setNewSermon({
-      title: '',
-      author: '',
-      location: '',
-      date: new Date().toISOString().split('T')[0],
-      time: 'morning',
-      content: '',
-      tags: [],
-      file: null
+    setNewMember({
+      firstName: '',
+      lastName: '',
+      gender: 'male',
+      birthDate: '',
+      phone: '',
+      email: '',
+      address: '',
+      memberSince: new Date().toISOString().split('T')[0],
+      status: 'active'
     });
     
     setIsAddModalOpen(false);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setNewSermon({
-        ...newSermon,
-        file: e.target.files[0]
-      });
+  const handleDeleteMember = (id: number) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')) {
+      setMembers(members.filter(m => m.id !== id));
     }
   };
 
-  const handleDeleteSermon = (id: number) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce sermon ?')) {
-      setSermons(sermons.filter(s => s.id !== id));
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewMember(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-      setNewSermon({
-        ...newSermon,
-        tags: [...newSermon.tags, e.currentTarget.value.trim()],
-      });
-      e.currentTarget.value = '';
-    }
-  };
-
-  const removeTag = (index: number) => {
-    setNewSermon({
-      ...newSermon,
-      tags: newSermon.tags.filter((_, i) => i !== index),
-    });
-  };
-
-  const filteredSermons = sermons.filter(sermon => {
+  const filteredMembers = members.filter(member => {
     // Filtre par recherche
     const matchesSearch = 
-      sermon.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sermon.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sermon.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      `${member.firstName} ${member.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.phone.includes(searchTerm) ||
+      member.email.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filtre par type
+    // Filtre par statut
     const matchesFilter = 
       activeFilter === 'all' || 
-      sermon.fileType === activeFilter.toUpperCase();
+      member.status === activeFilter;
     
     return matchesSearch && matchesFilter;
   });
 
-  const fileTypeClasses = {
-    PDF: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400',
-    DOCX: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400',
-    VIDEO: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-400'
+  const statusClasses = {
+    active: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400',
+    inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400'
+  };
+
+  const genderIcons = {
+    male: '♂',
+    female: '♀'
   };
 
   return (
@@ -250,7 +243,7 @@ export default function SermonsPage() {
             </button>
 
             <div className="flex-1 md:ml-6">
-              <h1 className="text-xl font-semibold">Sermons & Littérature</h1>
+              <h1 className="text-xl font-semibold">Membres</h1>
             </div>
 
             <div className="relative">
@@ -313,7 +306,7 @@ export default function SermonsPage() {
                   </div>
                   <input
                     type="text"
-                    placeholder="Rechercher un sermon..."
+                    placeholder="Rechercher un membre..."
                     className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -326,10 +319,10 @@ export default function SermonsPage() {
                     onChange={(e) => setActiveFilter(e.target.value)}
                     className="appearance-none pl-3 pr-8 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   >
-                    <option value="all">Tous les types</option>
-                    <option value="pdf">PDF</option>
-                    <option value="docx">DOCX</option>
-                    <option value="video">VIDÉO</option>
+                    <option value="all">Tous les membres</option>
+                    <option value="active">Actifs</option>
+                    <option value="inactive">Inactifs</option>
+                    <option value="pending">En attente</option>
                   </select>
                   <FiFilter className="absolute right-3 top-3 text-gray-400" />
                 </div>
@@ -349,7 +342,7 @@ export default function SermonsPage() {
                   className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   <FiPlus className="mr-2" />
-                  Ajouter un sermon
+                  Ajouter un membre
                 </button>
               </div>
             </div>
@@ -359,72 +352,69 @@ export default function SermonsPage() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Total sermons</p>
-                    <p className="text-2xl font-semibold">{sermons.length}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total membres</p>
+                    <p className="text-2xl font-semibold">{members.length}</p>
                   </div>
                   <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
-                    <FiBook className="text-xl" />
+                    <FiUsers className="text-xl" />
                   </div>
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Sermons PDF</p>
-                    <p className="text-2xl font-semibold">{sermons.filter(s => s.fileType === 'PDF').length}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Membres actifs</p>
+                    <p className="text-2xl font-semibold">{members.filter(m => m.status === 'active').length}</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400">
-                    <FiFileText className="text-xl" />
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Sermons DOCX</p>
-                    <p className="text-2xl font-semibold">{sermons.filter(s => s.fileType === 'DOCX').length}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
-                    <FiFileText className="text-xl" />
+                  <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400">
+                    <FiUser className="text-xl" />
                   </div>
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Sermons VIDÉO</p>
-                    <p className="text-2xl font-semibold">{sermons.filter(s => s.fileType === 'VIDEO').length}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Nouveaux (30j)</p>
+                    <p className="text-2xl font-semibold">12</p>
                   </div>
                   <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400">
-                    <FiBookOpen className="text-xl" />
+                    <FiUser className="text-xl" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">En attente</p>
+                    <p className="text-2xl font-semibold">{members.filter(m => m.status === 'pending').length}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400">
+                    <FiUser className="text-xl" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Liste des sermons */}
+            {/* Liste des membres */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Titre
+                        Membre
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Auteur
+                        Contact
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Lieu & Date
+                        Membre depuis
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Mots-clés
+                        Groupes
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Type
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Téléchargements
+                        Statut
                       </th>
                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Actions
@@ -432,39 +422,45 @@ export default function SermonsPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredSermons.length > 0 ? (
-                      filteredSermons.map((sermon) => (
-                        <tr key={sermon.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    {filteredMembers.length > 0 ? (
+                      filteredMembers.map((member) => (
+                        <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium">
-                              {sermon.title}
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <span className="text-gray-600 dark:text-gray-300">{genderIcons[member.gender as keyof typeof genderIcons]}</span>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium">
+                                  {member.firstName} {member.lastName}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  {new Date(member.birthDate).toLocaleDateString('fr-FR')}
+                                </div>
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-gray-200">{sermon.author}</div>
+                            <div className="text-sm text-gray-900 dark:text-gray-200">{member.phone}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{member.email}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-gray-200">{sermon.location}</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {new Date(sermon.date).toLocaleDateString('fr-FR')} • {sermon.time === 'morning' ? 'Matin' : 'Soir'}
-                            </div>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            {new Date(member.memberSince).toLocaleDateString('fr-FR')}
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-wrap gap-1">
-                              {sermon.tags.map((tag, idx) => (
-                                <span key={idx} className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                  {tag}
+                              {member.groups.map((group, idx) => (
+                                <span key={idx} className="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-400">
+                                  {group}
                                 </span>
                               ))}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${fileTypeClasses[sermon.fileType as keyof typeof fileTypeClasses]}`}>
-                              {sermon.fileType}
+                            <span className={`px-2 py-1 text-xs rounded-full ${statusClasses[member.status as keyof typeof statusClasses]}`}>
+                              {member.status === 'active' ? 'Actif' : 
+                               member.status === 'inactive' ? 'Inactif' : 'En attente'}
                             </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {sermon.downloads}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                             <div className="flex justify-end space-x-2">
@@ -472,7 +468,7 @@ export default function SermonsPage() {
                                 <FiEdit />
                               </button>
                               <button 
-                                onClick={() => handleDeleteSermon(sermon.id)}
+                                onClick={() => handleDeleteMember(member.id)}
                                 className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1"
                               >
                                 <FiTrash2 />
@@ -483,8 +479,8 @@ export default function SermonsPage() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                          Aucun sermon trouvé
+                        <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                          Aucun membre trouvé
                         </td>
                       </tr>
                     )}
@@ -505,11 +501,11 @@ export default function SermonsPage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             >
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Ajouter un nouveau sermon</h2>
+                  <h2 className="text-xl font-semibold">Ajouter un nouveau membre</h2>
                   <button
                     onClick={() => setIsAddModalOpen(false)}
                     className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
@@ -518,160 +514,158 @@ export default function SermonsPage() {
                   </button>
                 </div>
 
-                <form onSubmit={handleAddSermon}>
+                <form onSubmit={handleAddMember}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Titre de l'ouvrage *
+                    <div>
+                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Prénom *
                       </label>
                       <input
                         type="text"
-                        id="title"
-                        name="title"
+                        id="firstName"
+                        name="firstName"
                         required
-                        value={newSermon.title}
-                        onChange={(e) => setNewSermon({...newSermon, title: e.target.value})}
+                        value={newMember.firstName}
+                        onChange={handleInputChange}
                         className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="author" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Auteur *
+                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Nom *
                       </label>
                       <input
                         type="text"
-                        id="author"
-                        name="author"
+                        id="lastName"
+                        name="lastName"
                         required
-                        value={newSermon.author}
-                        onChange={(e) => setNewSermon({...newSermon, author: e.target.value})}
+                        value={newMember.lastName}
+                        onChange={handleInputChange}
                         className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Lieu *
-                      </label>
-                      <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        required
-                        value={newSermon.location}
-                        onChange={(e) => setNewSermon({...newSermon, location: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Date *
-                      </label>
-                      <input
-                        type="date"
-                        id="date"
-                        name="date"
-                        required
-                        value={newSermon.date}
-                        onChange={(e) => setNewSermon({...newSermon, date: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Moment *
+                      <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Genre *
                       </label>
                       <select
-                        id="time"
-                        name="time"
+                        id="gender"
+                        name="gender"
                         required
-                        value={newSermon.time}
-                        onChange={(e) => setNewSermon({...newSermon, time: e.target.value})}
+                        value={newMember.gender}
+                        onChange={handleInputChange}
                         className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
                       >
-                        <option value="morning">Matin</option>
-                        <option value="evening">Soir</option>
+                        <option value="male">Masculin</option>
+                        <option value="female">Féminin</option>
                       </select>
                     </div>
 
-                    <div className="md:col-span-2">
-                      <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Mots-clés
+                    <div>
+                      <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Date de naissance
                       </label>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {newSermon.tags.map((tag, index) => (
-                          <span 
-                            key={index} 
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-400"
-                          >
-                            {tag}
-                            <button 
-                              type="button"
-                              onClick={() => removeTag(index)}
-                              className="ml-1.5 inline-flex text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 focus:outline-none"
-                            >
-                              &times;
-                            </button>
-                          </span>
-                        ))}
-                      </div>
                       <input
-                        type="text"
-                        id="tags"
-                        placeholder="Appuyez sur Entrée pour ajouter un mot-clé"
-                        onKeyDown={handleTagInput}
+                        type="date"
+                        id="birthDate"
+                        name="birthDate"
+                        value={newMember.birthDate}
+                        onChange={handleInputChange}
                         className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
                       />
                     </div>
 
-                    <div className="md:col-span-2">
-                      <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Contenu ou description
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Téléphone *
                       </label>
-                      <textarea
-                        id="content"
-                        name="content"
-                        rows={4}
-                        value={newSermon.content}
-                        onChange={(e) => setNewSermon({...newSermon, content: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Fichier *
-                      </label>
-                      <div className="flex items-center">
-                        <label className="flex flex-col items-center justify-center w-full py-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600">
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <FiUpload className="mb-3 text-gray-400 text-xl" />
-                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                              <span className="font-semibold">Cliquez pour uploader</span> ou glissez-déposez
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              PDF, DOCX, MP4 (MAX. 50MB)
-                            </p>
-                          </div>
-                          <input 
-                            id="file" 
-                            name="file" 
-                            type="file" 
-                            accept=".pdf,.docx,.mp4" 
-                            className="hidden" 
-                            required
-                            onChange={handleFileChange}
-                          />
-                        </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FiPhone className="text-gray-400" />
+                        </div>
+                        <input
+                          type="tel"
+                          id="phone"
+                          name="phone"
+                          required
+                          value={newMember.phone}
+                          onChange={handleInputChange}
+                          className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+                        />
                       </div>
-                      {newSermon.file && (
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          Fichier sélectionné: {newSermon.file.name}
-                        </p>
-                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Email
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FiMail className="text-gray-400" />
+                        </div>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          value={newMember.email}
+                          onChange={handleInputChange}
+                          className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Adresse
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FiMapPin className="text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          id="address"
+                          name="address"
+                          value={newMember.address}
+                          onChange={handleInputChange}
+                          className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="memberSince" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Membre depuis *
+                      </label>
+                      <input
+                        type="date"
+                        id="memberSince"
+                        name="memberSince"
+                        required
+                        value={newMember.memberSince}
+                        onChange={handleInputChange}
+                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Statut *
+                      </label>
+                      <select
+                        id="status"
+                        name="status"
+                        required
+                        value={newMember.status}
+                        onChange={handleInputChange}
+                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+                      >
+                        <option value="active">Actif</option>
+                        <option value="inactive">Inactif</option>
+                        <option value="pending">En attente</option>
+                      </select>
                     </div>
                   </div>
 
