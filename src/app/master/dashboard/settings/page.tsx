@@ -1,785 +1,717 @@
+// app/master/dashboard/settings/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import { FiHome, FiCalendar, FiBook, FiMic, FiBell, FiUsers, FiDollarSign, FiSettings, FiLogOut, FiUser, FiChevronDown, FiMenu, FiX, FiSave, FiGlobe, FiLock, FiMail, FiCreditCard, FiEye, FiMoon, FiSun } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Types
-type ChurchProfile = {
-  id: string;
-  name: string;
-  slug: string;
-  logoUrl?: string | null;
-  colors?: {
-    primary: string;
-    secondary: string;
-  };
-  location?: string;
-  contact?: {
-    email?: string;
-    phone?: string;
-    address?: string;
-  };
-  social?: {
-    facebook?: string;
-    youtube?: string;
-    whatsapp?: string;
-  };
-};
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'editor' | 'viewer';
-  lastLogin: string;
-};
-
-type SettingsTab = 'general' | 'appearance' | 'users' | 'integrations' | 'security';
-
-// Composants
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('general');
-  const [church, setChurch] = useState<ChurchProfile>({
-    id: 'cmb',
-    name: 'Centre Missionnaire de Binza (CMB)',
-    slug: 'centre-missionnaire-de-binza',
-    logoUrl: '',
-    colors: { primary: '#003366', secondary: '#FFCC66' },
-    location: 'Binza, Kinshasa — RDC',
-    contact: {
-      email: 'contact@cmb-rdc.org',
-      phone: '+243 81 234 5678',
-      address: 'Avenue de la Mission 123, Binza'
-    },
-    social: {
-      facebook: 'https://facebook.com/cmb-rdc',
-      youtube: 'https://youtube.com/cmb-rdc',
-      whatsapp: 'https://wa.me/243812345678'
-    }
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
+  const [darkMode, setDarkMode] = useState(false);
+  const [primaryColor, setPrimaryColor] = useState('blue');
+  const [notifications, setNotifications] = useState({
+    email: true,
+    app: true,
+    sermonReminders: true,
+    eventReminders: true
+  });
+  const [security, setSecurity] = useState({
+    twoFactorAuth: false,
+    passwordChangeRequired: false,
+    loginAlerts: true
   });
 
-  const [users, setUsers] = useState<User[]>([
-    { id: 'u1', name: 'Pasteur Ntumba', email: 'pasteur@cmb-rdc.org', role: 'admin', lastLogin: '2025-08-10T14:30:00Z' },
-    { id: 'u2', name: 'Frère Frank', email: 'frank@cmb-rdc.org', role: 'editor', lastLogin: '2025-08-11T09:15:00Z' },
-    { id: 'u3', name: 'Sœur Marie', email: 'marie@cmb-rdc.org', role: 'viewer', lastLogin: '2025-08-05T16:45:00Z' }
-  ]);
+  const [formData, setFormData] = useState({
+    churchName: 'Centre Miss. de Binza',
+    language: 'fr',
+    timezone: 'Africa/Kinshasa',
+    email: 'contact@cmb.com',
+    currency: 'USD',
+  });
 
-  const handleSaveGeneral = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Logique de sauvegarde ici
-    alert('Paramètres généraux sauvegardés!');
+  const navItems = [
+    { name: 'Accueil', icon: <FiHome />, path: '/master/dashboard' },
+    { name: 'Événements', icon: <FiCalendar />, path: '/master/dashboard/programmes' },
+    { name: 'Sermons', icon: <FiBook />, path: '/master/dashboard/sermons' },
+    { name: 'Prédications', icon: <FiMic />, path: '/master/dashboard/preachings' },
+    { name: 'Annonces', icon: <FiBell />, path: '/master/dashboard/announcements' },
+    { name: 'Membres', icon: <FiUsers />, path: '/master/dashboard/members' },
+    { name: 'Finances', icon: <FiDollarSign />, path: '/master/dashboard/finances' },
+    { name: 'Paramètres', icon: <FiSettings />, path: '/master/dashboard/settings' },
+  ];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleSaveAppearance = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Logique de sauvegarde ici
-    alert('Paramètres d\'apparence sauvegardés!');
+  const handleNotificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setNotifications(prev => ({
+      ...prev,
+      [name]: checked
+    }));
   };
 
-  const handleAddUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Logique d'ajout d'utilisateur ici
-    alert('Nouvel utilisateur ajouté!');
+  const handleSecurityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setSecurity(prev => ({
+      ...prev,
+      [name]: checked
+    }));
   };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Paramètres sauvegardés:', formData);
+    // Ajoutez ici la logique pour sauvegarder les paramètres
+  };
+
+  const handleLogout = () => {
+    console.log('Déconnexion effectuée');
+    // Ajoutez ici votre logique de déconnexion
+  };
+
+  const colorOptions = [
+    { value: 'blue', name: 'Bleu', class: 'bg-blue-600' },
+    { value: 'indigo', name: 'Indigo', class: 'bg-indigo-600' },
+    { value: 'purple', name: 'Violet', class: 'bg-purple-600' },
+    { value: 'pink', name: 'Rose', class: 'bg-pink-600' },
+    { value: 'red', name: 'Rouge', class: 'bg-red-600' },
+    { value: 'orange', name: 'Orange', class: 'bg-orange-600' },
+    { value: 'yellow', name: 'Jaune', class: 'bg-yellow-600' },
+    { value: 'green', name: 'Vert', class: 'bg-green-600' },
+    { value: 'teal', name: 'Turquoise', class: 'bg-teal-600' },
+    { value: 'cyan', name: 'Cyan', class: 'bg-cyan-600' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-neutral-900 dark:to-neutral-950">
-      {/* Header */}
-      <div className="border-b bg-white dark:bg-neutral-900 dark:border-neutral-800 shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-neutral-700 dark:to-neutral-700 flex items-center justify-center overflow-hidden shadow-inner"
-              style={{ outline: `3px solid ${church.colors?.secondary}` }}
-            >
-              {church.logoUrl ? (
-                <img src={church.logoUrl} alt={church.name} className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-sm font-bold" style={{ color: church.colors?.primary }}>
-                  {church.name.split(/\s+/).map(w => w[0]).join('').slice(0, 3)}
-                </span>
-              )}
+    <div className={`flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200`}>
+      {/* Menu latéral - Version desktop */}
+      <div className="hidden md:flex flex-col w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
+              CMB
             </div>
             <div>
-              <h1 className="text-xl font-bold leading-tight text-gray-900 dark:text-gray-100">Paramètres</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{church.name}</p>
+              <h1 className="font-bold">Centre Miss. de Binza</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Tableau de bord</p>
             </div>
           </div>
+        </div>
 
-          <Link
-            href={`/master/dashboard`}
-            className="px-4 py-2 rounded-lg border text-sm font-medium transition-colors shadow-sm flex items-center gap-2
-                      border-gray-300 hover:bg-gray-50
-                      dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              href={item.path}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                usePathname() === item.path
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              <span className="text-lg">{item.icon}</span>
+              <span>{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           >
-            ← Retour au tableau de bord
-          </Link>
+            <FiLogOut />
+            <span>Déconnexion</span>
+          </button>
         </div>
       </div>
 
       {/* Contenu principal */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <div className="lg:w-64">
-            <nav className="space-y-1">
-              {([
-                { id: 'general', label: 'Général', icon: '⚙️' },
-                { id: 'appearance', label: 'Apparence', icon: '🎨' },
-                { id: 'users', label: 'Utilisateurs', icon: '👥' },
-                { id: 'integrations', label: 'Intégrations', icon: '🔌' },
-                { id: 'security', label: 'Sécurité', icon: '🔒' }
-              ] as const).map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors
-                            ${activeTab === tab.id 
-                              ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                              : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-neutral-800'}`}
-                >
-                  <span>{tab.icon}</span>
-                  <span className="font-medium">{tab.label}</span>
-                </button>
-              ))}
-            </nav>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between px-6 py-4">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 rounded-lg md:hidden hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <FiMenu className="text-xl" />
+            </button>
+
+            <div className="flex-1 md:ml-6">
+              <h1 className="text-xl font-semibold">Paramètres</h1>
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                  <FiUser className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="hidden md:inline">Admin</span>
+                <FiChevronDown className={`transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isProfileMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10"
+                  >
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <p className="font-medium">Admin</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">admin@eglise.com</p>
+                    </div>
+                    <div className="p-1">
+                      <Link
+                        href="/master/dashboard/profile"
+                        className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                      >
+                        <FiUser className="mr-2" />
+                        Mon profil
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-red-600 dark:text-red-400"
+                      >
+                        <FiLogOut className="mr-2" />
+                        Déconnexion
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
+        </header>
 
-          {/* Contenu du panneau */}
-          <div className="flex-1">
-            {/* Panneau Général */}
-            {activeTab === 'general' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-gray-200 dark:border-neutral-800 overflow-hidden"
-              >
-                <div className="p-6 border-b border-gray-200 dark:border-neutral-800">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                    <span>⚙️</span> Paramètres généraux
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Configurez les informations de base de votre église
-                  </p>
-                </div>
+        {/* Contenu des paramètres */}
+        <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {/* Onglets */}
+              <div className="border-b border-gray-200 dark:border-gray-700">
+                <nav className="flex -mb-px overflow-x-auto">
+                  <button
+                    onClick={() => setActiveTab('general')}
+                    className={`px-6 py-4 border-b-2 font-medium whitespace-nowrap ${
+                      activeTab === 'general'
+                        ? 'border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'
+                    }`}
+                  >
+                    Général
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('appearance')}
+                    className={`px-6 py-4 border-b-2 font-medium whitespace-nowrap ${
+                      activeTab === 'appearance'
+                        ? 'border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'
+                    }`}
+                  >
+                    Apparence
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('notifications')}
+                    className={`px-6 py-4 border-b-2 font-medium whitespace-nowrap ${
+                      activeTab === 'notifications'
+                        ? 'border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'
+                    }`}
+                  >
+                    Notifications
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('security')}
+                    className={`px-6 py-4 border-b-2 font-medium whitespace-nowrap ${
+                      activeTab === 'security'
+                        ? 'border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'
+                    }`}
+                  >
+                    Sécurité
+                  </button>
+                </nav>
+              </div>
 
-                <form onSubmit={handleSaveGeneral} className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Nom de l'église
-                      </label>
-                      <input
-                        type="text"
-                        value={church.name}
-                        onChange={(e) => setChurch({...church, name: e.target.value})}
-                        className="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
+              {/* Contenu des onglets */}
+              <div className="p-6">
+                {/* Onglet Général */}
+                {activeTab === 'general' && (
+                  <form onSubmit={handleSubmit}>
+                    <div className="space-y-6">
+                      <h2 className="text-lg font-medium">Paramètres généraux</h2>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Slug/URL
-                      </label>
-                      <div className="flex">
-                        <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 text-sm">
-                          yambopeto.com/
-                        </span>
-                        <input
-                          type="text"
-                          value={church.slug}
-                          onChange={(e) => setChurch({...church, slug: e.target.value})}
-                          className="flex-1 rounded-r-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Localisation
-                      </label>
-                      <input
-                        type="text"
-                        value={church.location}
-                        onChange={(e) => setChurch({...church, location: e.target.value})}
-                        className="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Email de contact
-                      </label>
-                      <input
-                        type="email"
-                        value={church.contact?.email}
-                        onChange={(e) => setChurch({
-                          ...church, 
-                          contact: {...church.contact, email: e.target.value}
-                        })}
-                        className="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Téléphone
-                      </label>
-                      <input
-                        type="tel"
-                        value={church.contact?.phone}
-                        onChange={(e) => setChurch({
-                          ...church, 
-                          contact: {...church.contact, phone: e.target.value}
-                        })}
-                        className="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Adresse physique
-                      </label>
-                      <textarea
-                        value={church.contact?.address}
-                        onChange={(e) => setChurch({
-                          ...church, 
-                          contact: {...church.contact, address: e.target.value}
-                        })}
-                        rows={2}
-                        className="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-200 dark:border-neutral-800 flex justify-end">
-                    <button
-                      type="submit"
-                      className="px-4 py-2 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all"
-                      style={{ backgroundColor: church.colors?.primary }}
-                    >
-                      Sauvegarder les modifications
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            )}
-
-            {/* Panneau Apparence */}
-            {activeTab === 'appearance' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-gray-200 dark:border-neutral-800 overflow-hidden"
-              >
-                <div className="p-6 border-b border-gray-200 dark:border-neutral-800">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                    <span>🎨</span> Apparence
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Personnalisez les couleurs et le logo de votre site
-                  </p>
-                </div>
-
-                <form onSubmit={handleSaveAppearance} className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Couleur primaire
-                      </label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="color"
-                          value={church.colors?.primary}
-                          onChange={(e) => setChurch({
-                            ...church, 
-                            colors: {...church.colors, primary: e.target.value}
-                          })}
-                          className="w-16 h-10 rounded-lg cursor-pointer"
-                        />
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {church.colors?.primary}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Couleur secondaire
-                      </label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="color"
-                          value={church.colors?.secondary}
-                          onChange={(e) => setChurch({
-                            ...church, 
-                            colors: {...church.colors, secondary: e.target.value}
-                          })}
-                          className="w-16 h-10 rounded-lg cursor-pointer"
-                        />
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {church.colors?.secondary}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Logo de l'église
-                      </label>
-                      <div className="flex items-center gap-4">
-                        <div className="h-20 w-20 rounded-lg border border-gray-300 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden">
-                          {church.logoUrl ? (
-                            <img src={church.logoUrl} alt="Logo actuel" className="h-full w-full object-cover" />
-                          ) : (
-                            <span className="text-gray-400 dark:text-gray-500">Aucun logo</span>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              if (e.target.files?.[0]) {
-                                const file = e.target.files[0];
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  setChurch({
-                                    ...church,
-                                    logoUrl: event.target?.result as string
-                                  });
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                            className="block w-full text-sm text-gray-500
-                                      file:mr-4 file:py-2 file:px-4
-                                      file:rounded-lg file:border-0
-                                      file:text-sm file:font-semibold
-                                      file:bg-blue-50 file:text-blue-700
-                                      hover:file:bg-blue-100"
-                          />
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Taille recommandée: 200×200 pixels (format PNG ou JPG)
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Aperçu du thème
-                      </label>
-                      <div className="p-4 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div
-                            className="h-10 w-10 rounded-lg border border-gray-300 dark:border-neutral-700 shadow-inner flex items-center justify-center"
-                            style={{ backgroundColor: church.colors?.primary }}
-                          >
-                            <span className="text-xs text-white font-bold">P</span>
-                          </div>
-                          <div
-                            className="h-10 w-10 rounded-lg border border-gray-300 dark:border-neutral-700 shadow-inner flex items-center justify-center"
-                            style={{ backgroundColor: church.colors?.secondary }}
-                          >
-                            <span className="text-xs text-white font-bold">S</span>
-                          </div>
-                          <div className="h-10 w-10 rounded-lg border border-gray-300 dark:border-neutral-700 shadow-inner bg-white dark:bg-neutral-800 flex items-center justify-center">
-                            <span className="text-xs text-gray-700 dark:text-gray-300 font-bold">B</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label htmlFor="churchName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Nom de l'église
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FiUser className="text-gray-400" />
+                            </div>
+                            <input
+                              type="text"
+                              id="churchName"
+                              name="churchName"
+                              value={formData.churchName}
+                              onChange={handleChange}
+                              className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+                            />
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <div className="h-3 w-full rounded-full" style={{ backgroundColor: church.colors?.primary }} />
-                          <div className="h-3 w-3/4 rounded-full" style={{ backgroundColor: church.colors?.secondary }} />
-                          <div className="h-3 w-1/2 rounded-full bg-gray-300 dark:bg-neutral-700" />
+
+                        <div>
+                          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Email de contact
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FiMail className="text-gray-400" />
+                            </div>
+                            <input
+                              type="email"
+                              id="email"
+                              name="email"
+                              value={formData.email}
+                              onChange={handleChange}
+                              className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+                            />
+                          </div>
                         </div>
-                        <div className="mt-4 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                          <span>Primaire</span>
-                          <span>Secondaire</span>
-                          <span>Neutre</span>
+
+                        <div>
+                          <label htmlFor="language" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Langue
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FiGlobe className="text-gray-400" />
+                            </div>
+                            <select
+                              id="language"
+                              name="language"
+                              value={formData.language}
+                              onChange={handleChange}
+                              className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5 appearance-none"
+                            >
+                              <option value="fr">Français</option>
+                              <option value="en">English</option>
+                              <option value="es">Español</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Fuseau horaire
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FiGlobe className="text-gray-400" />
+                            </div>
+                            <select
+                              id="timezone"
+                              name="timezone"
+                              value={formData.timezone}
+                              onChange={handleChange}
+                              className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5 appearance-none"
+                            >
+                              <option value="Africa/Kinshasa">Kinshasa (GMT+1)</option>
+                              <option value="Africa/Lagos">Lagos (GMT+1)</option>
+                              <option value="Europe/Paris">Paris (GMT+2)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="currency" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Devise
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FiCreditCard className="text-gray-400" />
+                            </div>
+                            <select
+                              id="currency"
+                              name="currency"
+                              value={formData.currency}
+                              onChange={handleChange}
+                              className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5 appearance-none"
+                            >
+                              <option value="USD">USD ($)</option>
+                              <option value="EUR">EUR (€)</option>
+                              <option value="CDF">CDF (FC)</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="pt-4 border-t border-gray-200 dark:border-neutral-800 flex justify-end">
-                    <button
-                      type="submit"
-                      className="px-4 py-2 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all"
-                      style={{ backgroundColor: church.colors?.primary }}
-                    >
-                      Sauvegarder les modifications
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            )}
-
-            {/* Panneau Utilisateurs */}
-            {activeTab === 'users' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-gray-200 dark:border-neutral-800 overflow-hidden"
-              >
-                <div className="p-6 border-b border-gray-200 dark:border-neutral-800">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                        <span>👥</span> Gestion des utilisateurs
-                      </h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Gérez qui peut accéder à votre tableau de bord
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => document.getElementById('add-user-modal')?.showModal()}
-                      className="px-4 py-2 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all"
-                      style={{ backgroundColor: church.colors?.primary }}
-                    >
-                      + Ajouter un utilisateur
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                    <thead className="bg-gray-50 dark:bg-neutral-800">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Nom
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Email
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Rôle
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Dernière connexion
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-neutral-900 divide-y divide-gray-200 dark:divide-neutral-700">
-                      {users.map((user) => (
-                        <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-neutral-800">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {user.name}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {user.email}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              user.role === 'admin' 
-                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
-                                : user.role === 'editor'
-                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                                : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                            }`}>
-                              {user.role === 'admin' ? 'Administrateur' : user.role === 'editor' ? 'Éditeur' : 'Observateur'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {new Date(user.lastLogin).toLocaleString('fr-FR')}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">
-                              Modifier
-                            </button>
-                            <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                              Supprimer
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Modale d'ajout d'utilisateur */}
-                <dialog id="add-user-modal" className="rounded-xl p-0 w-full max-w-md backdrop:bg-black/50">
-                  <form onSubmit={handleAddUser} className="bg-white dark:bg-neutral-900 rounded-xl shadow-xl">
-                    <div className="p-6 border-b border-gray-200 dark:border-neutral-800">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Ajouter un utilisateur</h3>
-                    </div>
-                    <div className="p-6 space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Nom complet
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          className="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Rôle
-                        </label>
-                        <select
-                          className="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-gray-900 dark:text-gray-100"
-                          required
+                      <div className="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                        <button
+                          type="submit"
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                          <option value="admin">Administrateur</option>
-                          <option value="editor">Éditeur</option>
-                          <option value="viewer">Observateur</option>
-                        </select>
+                          <FiSave className="mr-2" />
+                          Sauvegarder les modifications
+                        </button>
                       </div>
-                    </div>
-                    <div className="p-6 border-t border-gray-200 dark:border-neutral-800 flex justify-end gap-3">
-                      <button
-                        type="button"
-                        onClick={() => document.getElementById('add-user-modal')?.close()}
-                        className="px-4 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800 text-sm"
-                      >
-                        Annuler
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 rounded-lg text-white text-sm font-medium"
-                        style={{ backgroundColor: church.colors?.primary }}
-                      >
-                        Ajouter l'utilisateur
-                      </button>
                     </div>
                   </form>
-                </dialog>
-              </motion.div>
-            )}
+                )}
 
-            {/* Panneau Intégrations */}
-            {activeTab === 'integrations' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-gray-200 dark:border-neutral-800 overflow-hidden"
-              >
-                <div className="p-6 border-b border-gray-200 dark:border-neutral-800">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                    <span>🔌</span> Intégrations
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Connectez votre site à des services externes
-                  </p>
-                </div>
+                {/* Onglet Apparence */}
+                {activeTab === 'appearance' && (
+                  <div className="space-y-6">
+                    <h2 className="text-lg font-medium">Personnalisation de l'apparence</h2>
 
-                <div className="p-6 space-y-6">
-                  <div className="p-4 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center text-white">
-                          <span className="text-xl">F</span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900 dark:text-gray-100">Facebook</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Connectez votre page Facebook
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        className="px-4 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm font-medium"
-                      >
-                        {church.social?.facebook ? 'Modifier' : 'Connecter'}
-                      </button>
-                    </div>
-                    {church.social?.facebook && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-neutral-700">
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                          Connecté à: <a href={church.social.facebook} className="text-blue-600 dark:text-blue-400" target="_blank">{church.social.facebook}</a>
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-4 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-lg bg-red-500 flex items-center justify-center text-white">
-                          <span className="text-xl">Y</span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900 dark:text-gray-100">YouTube</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Connectez votre chaîne YouTube
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        className="px-4 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm font-medium"
-                      >
-                        {church.social?.youtube ? 'Modifier' : 'Connecter'}
-                      </button>
-                    </div>
-                    {church.social?.youtube && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-neutral-700">
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                          Connecté à: <a href={church.social.youtube} className="text-blue-600 dark:text-blue-400" target="_blank">{church.social.youtube}</a>
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-4 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-lg bg-green-500 flex items-center justify-center text-white">
-                          <span className="text-xl">W</span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900 dark:text-gray-100">WhatsApp</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Configurez votre groupe WhatsApp
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        className="px-4 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm font-medium"
-                      >
-                        {church.social?.whatsapp ? 'Modifier' : 'Connecter'}
-                      </button>
-                    </div>
-                    {church.social?.whatsapp && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-neutral-700">
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                          Connecté à: <a href={church.social.whatsapp} className="text-blue-600 dark:text-blue-400" target="_blank">{church.social.whatsapp}</a>
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Panneau Sécurité */}
-            {activeTab === 'security' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-gray-200 dark:border-neutral-800 overflow-hidden"
-              >
-                <div className="p-6 border-b border-gray-200 dark:border-neutral-800">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                    <span>🔒</span> Sécurité
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Paramètres de sécurité et accès
-                  </p>
-                </div>
-
-                <div className="p-6 space-y-6">
-                  <div className="p-4 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Connexion sécurisée</h3>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">Authentification à deux facteurs</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Ajoutez une couche de sécurité supplémentaire
+                          <h3 className="font-medium">Mode sombre</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Activez le mode sombre pour une meilleure expérience nocturne
                           </p>
                         </div>
-                        <button className="px-3 py-1 rounded-lg border border-gray-300 dark:border-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm font-medium">
-                          Activer
+                        <button
+                          onClick={() => setDarkMode(!darkMode)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                            darkMode ? 'bg-blue-600' : 'bg-gray-200'
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              darkMode ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
                         </button>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">Changer de mot de passe</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Mettez à jour votre mot de passe régulièrement
-                          </p>
+                      <div>
+                        <h3 className="font-medium mb-3">Couleur principale</h3>
+                        <div className="grid grid-cols-5 gap-3">
+                          {colorOptions.map((color) => (
+                            <button
+                              key={color.value}
+                              onClick={() => setPrimaryColor(color.value)}
+                              className={`flex flex-col items-center ${primaryColor === color.value ? 'ring-2 ring-offset-2 ring-blue-500 rounded-lg' : ''}`}
+                            >
+                              <div className={`h-10 w-10 rounded-lg ${color.class} flex items-center justify-center`}>
+                                {primaryColor === color.value && <FiEye className="text-white" />}
+                              </div>
+                              <span className="text-xs mt-1">{color.name}</span>
+                            </button>
+                          ))}
                         </div>
-                        <button className="px-3 py-1 rounded-lg border border-gray-300 dark:border-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm font-medium">
-                          Modifier
-                        </button>
+                      </div>
+
+                      <div>
+                        <h3 className="font-medium mb-3">Prévisualisation</h3>
+                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                          <div className="flex items-center space-x-3">
+                            <div className={`h-8 w-8 rounded-full ${colorOptions.find(c => c.value === primaryColor)?.class} flex items-center justify-center text-white`}>
+                              <FiUser />
+                            </div>
+                            <div>
+                              <p className="font-medium">Exemple de composant</p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Ceci est une prévisualisation</p>
+                            </div>
+                          </div>
+                          <div className="mt-4 flex space-x-2">
+                            <button className={`px-3 py-1 rounded-lg text-white ${colorOptions.find(c => c.value === primaryColor)?.class}`}>
+                              Bouton
+                            </button>
+                            <button className="px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-600">
+                              Secondaire
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="p-4 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Sessions actives</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">Chrome sur Windows</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Kinshasa, RDC · Connecté il y a 2 heures
-                          </p>
-                        </div>
-                        <button className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium">
-                          Déconnecter
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">Safari sur iPhone</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Kinshasa, RDC · Connecté il y a 3 jours
-                          </p>
-                        </div>
-                        <button className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium">
-                          Déconnecter
-                        </button>
-                      </div>
+                    <div className="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                      <button
+                        onClick={() => console.log('Apparence sauvegardée')}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <FiSave className="mr-2" />
+                        Sauvegarder les modifications
+                      </button>
                     </div>
                   </div>
+                )}
 
-                  <div className="p-4 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10">
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Zone dangereuse</h3>
+                {/* Onglet Notifications */}
+                {activeTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <h2 className="text-lg font-medium">Préférences de notifications</h2>
+
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">Exporter les données</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Téléchargez une copie de toutes vos données
+                      <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="email"
+                            name="email"
+                            type="checkbox"
+                            checked={notifications.email}
+                            onChange={handleNotificationChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="ml-3 text-sm">
+                          <label htmlFor="email" className="font-medium text-gray-700 dark:text-gray-300">
+                            Notifications par email
+                          </label>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Recevez des notifications importantes par email
                           </p>
                         </div>
-                        <button className="px-3 py-1 rounded-lg border border-gray-300 dark:border-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm font-medium">
-                          Exporter
-                        </button>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-red-700 dark:text-red-300">Supprimer le compte</p>
-                          <p className="text-xs text-red-500 dark:text-red-400">
-                            Cette action est irréversible
+                      <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="app"
+                            name="app"
+                            type="checkbox"
+                            checked={notifications.app}
+                            onChange={handleNotificationChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="ml-3 text-sm">
+                          <label htmlFor="app" className="font-medium text-gray-700 dark:text-gray-300">
+                            Notifications dans l'application
+                          </label>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Recevez des notifications dans le tableau de bord
                           </p>
                         </div>
-                        <button className="px-3 py-1 rounded-lg border border-red-300 dark:border-red-700 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-medium">
-                          Supprimer
-                        </button>
                       </div>
+
+                      <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="sermonReminders"
+                            name="sermonReminders"
+                            type="checkbox"
+                            checked={notifications.sermonReminders}
+                            onChange={handleNotificationChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="ml-3 text-sm">
+                          <label htmlFor="sermonReminders" className="font-medium text-gray-700 dark:text-gray-300">
+                            Rappels de sermons
+                          </label>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Recevez des rappels pour les nouveaux sermons
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="eventReminders"
+                            name="eventReminders"
+                            type="checkbox"
+                            checked={notifications.eventReminders}
+                            onChange={handleNotificationChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="ml-3 text-sm">
+                          <label htmlFor="eventReminders" className="font-medium text-gray-700 dark:text-gray-300">
+                            Rappels d'événements
+                          </label>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Recevez des rappels pour les événements à venir
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                      <button
+                        onClick={() => console.log('Préférences de notifications sauvegardées')}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <FiSave className="mr-2" />
+                        Sauvegarder les modifications
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Onglet Sécurité */}
+                {activeTab === 'security' && (
+                  <div className="space-y-6">
+                    <h2 className="text-lg font-medium">Paramètres de sécurité</h2>
+
+                    <div className="space-y-4">
+                      <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="twoFactorAuth"
+                            name="twoFactorAuth"
+                            type="checkbox"
+                            checked={security.twoFactorAuth}
+                            onChange={handleSecurityChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="ml-3 text-sm">
+                          <label htmlFor="twoFactorAuth" className="font-medium text-gray-700 dark:text-gray-300">
+                            Authentification à deux facteurs (2FA)
+                          </label>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Ajoutez une couche de sécurité supplémentaire à votre compte
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="passwordChangeRequired"
+                            name="passwordChangeRequired"
+                            type="checkbox"
+                            checked={security.passwordChangeRequired}
+                            onChange={handleSecurityChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="ml-3 text-sm">
+                          <label htmlFor="passwordChangeRequired" className="font-medium text-gray-700 dark:text-gray-300">
+                            Changer le mot de passe périodiquement
+                          </label>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Requiert un changement de mot de passe tous les 90 jours
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="loginAlerts"
+                            name="loginAlerts"
+                            type="checkbox"
+                            checked={security.loginAlerts}
+                            onChange={handleSecurityChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="ml-3 text-sm">
+                          <label htmlFor="loginAlerts" className="font-medium text-gray-700 dark:text-gray-300">
+                            Alertes de connexion
+                          </label>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Recevez une alerte lorsqu'une nouvelle connexion est détectée
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <h3 className="font-medium">Sessions actives</h3>
+                        <div className="mt-2 space-y-2">
+                          <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div>
+                              <p className="font-medium">Chrome sur Windows</p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Kinshasa, Congo • Dernière activité: il y a 2 heures
+                              </p>
+                            </div>
+                            <button className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                              Déconnecter
+                            </button>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div>
+                              <p className="font-medium">Safari sur iPhone</p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Paris, France • Dernière activité: il y a 3 jours
+                              </p>
+                            </div>
+                            <button className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                              Déconnecter
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                      <button
+                        onClick={() => console.log('Paramètres de sécurité sauvegardés')}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <FiSave className="mr-2" />
+                        Sauvegarder les modifications
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Section Paramètres avancés */}
+            {activeTab === 'general' && (
+              <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="p-6">
+                  <h2 className="text-lg font-medium text-red-600 dark:text-red-400">Zone dangereuse</h2>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Ces actions sont irréversibles. Soyez certain de ce que vous faites.
+                  </p>
+
+                  <div className="mt-6 space-y-4">
+                    <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                      <div>
+                        <h3 className="font-medium">Supprimer toutes les données</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Cela supprimera toutes les données de votre église de manière permanente.
+                        </p>
+                      </div>
+                      <button className="px-4 py-2 border border-red-600 text-sm font-medium rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                        Supprimer
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                      <div>
+                        <h3 className="font-medium">Désactiver le compte</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Votre compte sera désactivé et vous ne pourrez plus accéder au dashboard.
+                        </p>
+                      </div>
+                      <button className="px-4 py-2 border border-red-600 text-sm font-medium rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                        Désactiver
+                      </button>
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

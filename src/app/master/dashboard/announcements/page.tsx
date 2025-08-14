@@ -1,728 +1,404 @@
 // app/master/dashboard/announcements/page.tsx
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { useMemo, useState, useEffect } from 'react';
-import { motion, Variants } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import { FiHome, FiCalendar, FiBook, FiMic, FiBell, FiUsers, FiDollarSign, FiSettings, FiLogOut, FiUser, FiChevronDown, FiMenu, FiX, FiPlus, FiSearch, FiClock, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 
-/* ===================== Types ===================== */
-type ChurchProfile = {
-  id: string;
-  name: string;
-  slug: string;
-  logoUrl?: string | null;
-  colors?: { primary: string; secondary: string };
-  location?: string;
-};
-
-type AnnouncementItem = {
-  id: string;
-  title: string;
-  excerpt?: string;
-  content?: string;
-  createdAt: string; // ISO
-  startAt?: string;  // ISO
-  endAt?: string;    // ISO
-  published: boolean;
-  pinned?: boolean;
-  audience?: 'all' | 'youth' | 'choir' | 'workers';
-  category?: 'collecte' | 'programme' | 'info' | 'autre';
-};
-
-/* ===================== Animations ===================== */
-const fadeIn: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (i: number = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.06, duration: 0.4, ease: 'easeOut' },
-  }),
-};
-const containerStagger: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } } };
-
-/* ===================== Helpers ===================== */
-const getAcronym = (name?: string) =>
-  (name || '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w[0]?.toUpperCase() || '')
-    .join('')
-    .slice(0, 3);
-
-const fmtDateLong = (iso?: string) =>
-  iso ? new Date(iso).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-
-function computeStatus(a: AnnouncementItem, now = new Date()): 'active' | 'scheduled' | 'expired' | 'draft' {
-  if (!a.published) return 'draft';
-  const start = a.startAt ? new Date(a.startAt) : null;
-  const end = a.endAt ? new Date(a.endAt) : null;
-  if (start && now < start) return 'scheduled';
-  if (end && now > end) return 'expired';
-  return 'active';
-}
-
-/* ===================== Page ===================== */
 export default function AnnouncementsPage() {
-  // Charte CMB
-  const [church] = useState<ChurchProfile>({
-    id: 'cmb',
-    name: 'Centre Missionnaire de Binza (CMB)',
-    slug: 'centre-missionnaire-de-binza',
-    logoUrl: '',
-    colors: { primary: '#003366', secondary: '#FFCC66' },
-    location: 'Binza, Kinshasa — RDC',
-  });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const pathname = usePathname();
 
-  // Données simulées (remplace plus tard par fetch API)
-  const [items, setItems] = useState<AnnouncementItem[]>([
-    {
-      id: 'a1',
-      title: 'Collecte spéciale Construction',
-      excerpt: 'Soutien pour la construction du temple.',
-      content: 'Nous lançons une collecte spéciale pour accélérer la construction du temple principal...',
-      createdAt: '2025-08-02T10:00:00Z',
-      startAt: '2025-08-05T08:00:00Z',
-      endAt: '2025-08-31T20:00:00Z',
-      published: true,
-      pinned: true,
-      category: 'collecte',
-      audience: 'all',
-    },
-    {
-      id: 'a2',
-      title: 'Programme de la Convention de Décembre',
-      excerpt: 'Dates, orateurs et thèmes.',
-      content: 'La convention aura lieu du 12 au 18 décembre 2025...',
-      createdAt: '2025-08-01T14:15:00Z',
-      startAt: '2025-12-01T08:00:00Z',
-      endAt: '2025-12-20T23:00:00Z',
-      published: true,
-      pinned: false,
-      category: 'programme',
-      audience: 'all',
-    },
-    {
-      id: 'a3',
-      title: 'Réunion des travailleurs',
-      excerpt: 'Briefing avant la veillée.',
-      content: 'Tous les frères et sœurs impliqués dans le service sont attendus samedi 17h...',
-      createdAt: '2025-08-10T09:20:00Z',
-      startAt: '2025-08-16T16:00:00Z',
-      published: false,
-      pinned: false,
-      category: 'info',
-      audience: 'workers',
-    },
-    {
-      id: 'a4',
-      title: 'Retraite spirituelle des jeunes',
-      excerpt: 'Inscriptions ouvertes pour la retraite annuelle.',
-      content: 'La retraite spirituelle des jeunes aura lieu du 25 au 27 septembre...',
-      createdAt: '2025-08-03T11:30:00Z',
-      startAt: '2025-09-25T08:00:00Z',
-      endAt: '2025-09-27T18:00:00Z',
-      published: true,
-      pinned: true,
-      category: 'programme',
-      audience: 'youth',
-    },
-    {
-      id: 'a5',
-      title: 'Collecte pour les nécessiteux',
-      excerpt: 'Soutien aux familles dans le besoin.',
-      content: 'Une collecte spéciale est organisée pour aider les familles démunies...',
-      createdAt: '2025-08-05T15:45:00Z',
-      startAt: '2025-08-10T00:00:00Z',
-      endAt: '2025-08-25T23:59:00Z',
-      published: true,
-      pinned: false,
-      category: 'collecte',
-      audience: 'all',
-    },
-    {
-      id: 'a6',
-      title: 'Répétition chorale exceptionnelle',
-      excerpt: 'Préparation pour le concert de Noël.',
-      content: 'Une répétition supplémentaire est prévue ce dimanche après le culte...',
-      createdAt: '2025-08-08T13:20:00Z',
-      startAt: '2025-08-15T14:00:00Z',
-      published: true,
-      pinned: false,
-      category: 'info',
-      audience: 'choir',
-    },
-    {
-      id: 'a7',
-      title: 'Formation des nouveaux convertis',
-      excerpt: 'Session de formation biblique.',
-      content: 'Les nouveaux membres sont invités à une session de formation...',
-      createdAt: '2025-08-04T09:10:00Z',
-      startAt: '2025-08-21T10:00:00Z',
-      endAt: '2025-08-21T12:00:00Z',
-      published: true,
-      pinned: false,
-      category: 'programme',
-      audience: 'all',
-    },
-    {
-      id: 'a8',
-      title: 'Nettoyage du temple',
-      excerpt: 'Journée de nettoyage communautaire.',
-      content: 'Tous les membres sont invités à participer au nettoyage du temple...',
-      createdAt: '2025-08-06T16:30:00Z',
-      startAt: '2025-08-14T08:00:00Z',
-      published: false,
-      pinned: false,
-      category: 'info',
-      audience: 'all',
-    },
-    {
-      id: 'a9',
-      title: 'Concert de louange',
-      excerpt: 'Soirée spéciale de louange et adoration.',
-      content: 'Venez participer à une soirée de louange exceptionnelle...',
-      createdAt: '2025-08-07T14:00:00Z',
-      startAt: '2025-09-05T19:00:00Z',
-      endAt: '2025-09-05T22:00:00Z',
-      published: true,
-      pinned: true,
-      category: 'programme',
-      audience: 'all',
-    },
-    {
-      id: 'a10',
-      title: 'Réunion des diacres',
-      excerpt: 'Planification des activités du trimestre.',
-      content: 'Les diacres sont convoqués pour une réunion importante...',
-      createdAt: '2025-08-09T10:15:00Z',
-      startAt: '2025-08-17T15:00:00Z',
-      published: true,
-      pinned: false,
-      category: 'info',
-      audience: 'workers',
-    },
-    {
-      id: 'a11',
-      title: 'Campagne d\'évangélisation',
-      excerpt: 'Préparation pour la campagne de septembre.',
-      content: 'Inscrivez-vous pour participer à la campagne d\'évangélisation...',
-      createdAt: '2025-08-11T11:00:00Z',
-      startAt: '2025-09-01T08:00:00Z',
-      endAt: '2025-09-30T20:00:00Z',
-      published: true,
-      pinned: true,
-      category: 'programme',
-      audience: 'all',
-    },
-    {
-      id: 'a12',
-      title: 'Atelier de formation biblique',
-      excerpt: 'Étude approfondie du livre des Romains.',
-      content: 'Un atelier d\'étude biblique sera organisé chaque jeudi...',
-      createdAt: '2025-08-12T17:00:00Z',
-      startAt: '2025-09-02T18:00:00Z',
-      endAt: '2025-12-16T20:00:00Z',
-      published: true,
-      pinned: false,
-      category: 'programme',
-      audience: 'all',
-    },
-  ]);
+  const navItems = [
+    { name: 'Accueil', icon: <FiHome />, path: '/master/dashboard' },
+    { name: 'Événements', icon: <FiCalendar />, path: '/master/dashboard/programmes' },
+    { name: 'Sermons', icon: <FiBook />, path: '/master/dashboard/sermons' },
+    { name: 'Prédications', icon: <FiMic />, path: '/master/dashboard/sermons' },
+    { name: 'Annonces', icon: <FiBell />, path: '/master/dashboard/announcements' },
+    { name: 'Membres', icon: <FiUsers />, path: '/master/dashboard/members' },
+    { name: 'Finances', icon: <FiDollarSign />, path: '/master/dashboard/finances' },
+    { name: 'Paramètres', icon: <FiSettings />, path: '/master/dashboard/settings' },
+  ];
 
-  // UI state
-  const [q, setQ] = useState('');
-  const [status, setStatus] = useState<'all' | 'active' | 'scheduled' | 'expired' | 'draft'>('all');
-  const [category, setCategory] = useState<'all' | 'collecte' | 'programme' | 'info' | 'autre'>('all');
-  const [sortBy, setSortBy] = useState<'created_desc' | 'created_asc' | 'start_desc' | 'start_asc'>('created_desc');
-  const [page, setPage] = useState(1);
-  const pageSize = 8;
+  // Données de démonstration
+  const announcements = [
+    { 
+      id: 1, 
+      type: 'worship', 
+      title: 'Culte de dimanche prochain', 
+      content: 'Le culte de dimanche prochain aura lieu à 9h30 avec une prédication spéciale sur le thème "La foi en action".', 
+      date: '15/06/2023', 
+      status: 'active',
+      scheduledDate: '18/06/2023 09:30'
+    },
+    { 
+      id: 2, 
+      type: 'event', 
+      title: 'Retraite spirituelle', 
+      content: 'Inscrivez-vous pour la retraite spirituelle du mois de juillet. Places limitées.', 
+      date: '10/06/2023', 
+      status: 'active',
+      scheduledDate: '15/07/2023 08:00'
+    },
+    { 
+      id: 3, 
+      type: 'general', 
+      title: 'Collecte spéciale', 
+      content: 'Une collecte spéciale sera organisée ce dimanche pour soutenir le projet de construction.', 
+      date: '05/06/2023', 
+      status: 'expired',
+      scheduledDate: '11/06/2023 10:00'
+    },
+    { 
+      id: 4, 
+      type: 'meeting', 
+      title: 'Réunion des responsables', 
+      content: 'Tous les responsables sont conviés à une réunion importante vendredi à 18h.', 
+      date: '01/06/2023', 
+      status: 'expired',
+      scheduledDate: '09/06/2023 18:00'
+    },
+  ];
 
-  // Modale
-  const [openModal, setOpenModal] = useState(false);
-  const [form, setForm] = useState<Omit<AnnouncementItem, 'id'>>({
-    title: '',
-    excerpt: '',
-    content: '',
-    createdAt: new Date().toISOString(),
-    startAt: '',
-    endAt: '',
-    published: true,
-    pinned: false,
-    category: 'autre',
-    audience: 'all',
-  });
+  const handleLogout = () => {
+    console.log('Déconnexion effectuée');
+    // Ajoutez ici votre logique de déconnexion
+  };
 
-  // Filtres + tri
-  const filtered = useMemo(() => {
-    const now = new Date();
-    const ql = q.trim().toLowerCase();
-    let list = items.filter((a) => {
-      const s = computeStatus(a, now);
-      const okStatus = status === 'all' ? true : s === status;
-      const okCat = category === 'all' ? true : a.category === category;
-      const okQ =
-        !ql ||
-        a.title.toLowerCase().includes(ql) ||
-        (a.excerpt || '').toLowerCase().includes(ql) ||
-        (a.content || '').toLowerCase().includes(ql);
-      return okStatus && okCat && okQ;
-    });
+  const filteredAnnouncements = announcements
+    .filter(announcement => 
+      activeTab === 'all' || announcement.type === activeTab
+    )
+    .filter(announcement => 
+      announcement.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      announcement.content.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-    list = list.sort((a, b) => {
-      if (sortBy === 'created_desc') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      if (sortBy === 'created_asc') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      if (sortBy === 'start_desc') return new Date(b.startAt || b.createdAt).getTime() - new Date(a.startAt || a.createdAt).getTime();
-      return new Date(a.startAt || a.createdAt).getTime() - new Date(b.startAt || b.createdAt).getTime();
-    });
-
-    // Les épinglées d’abord
-    list = list.sort((a, b) => Number(b.pinned) - Number(a.pinned));
-
-    return list;
-  }, [items, q, status, category, sortBy]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  useEffect(() => {
-    if (page > totalPages) setPage(1);
-  }, [totalPages, page]);
-
-  const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
-
-  // Accents
-  const primary = church.colors?.primary || '#003366';
-  const secondary = church.colors?.secondary || '#FFCC66';
-
-  // Actions
-  function togglePin(id: string) {
-    setItems((prev) => prev.map((a) => (a.id === id ? { ...a, pinned: !a.pinned } : a)));
-  }
-  function togglePublish(id: string) {
-    setItems((prev) => prev.map((a) => (a.id === id ? { ...a, published: !a.published } : a)));
-  }
-  function remove(id: string) {
-    setItems((prev) => prev.filter((a) => a.id !== id));
-  }
-  function addAnnouncement() {
-    if (!form.title.trim()) return;
-    const newItem: AnnouncementItem = {
-      id: `a${items.length + 1}`,
-      ...form,
-      createdAt: new Date().toISOString(),
-    };
-    setItems((prev) => [newItem, ...prev]);
-    setOpenModal(false);
-    setForm({
-      title: '',
-      excerpt: '',
-      content: '',
-      createdAt: new Date().toISOString(),
-      startAt: '',
-      endAt: '',
-      published: true,
-      pinned: false,
-      category: 'autre',
-      audience: 'all',
-    });
-  }
+  const announcementTypes = [
+    { id: 'all', name: 'Toutes les annonces' },
+    { id: 'worship', name: 'Cultes' },
+    { id: 'event', name: 'Événements' },
+    { id: 'general', name: 'Communiqués' },
+    { id: 'meeting', name: 'Réunions' },
+  ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-neutral-900 dark:to-neutral-950">
-      {/* Header sticky */}
-      <div className="sticky top-0 z-40 border-b bg-white dark:bg-neutral-900 dark:border-neutral-800/90 shadow-sm/50 backdrop-blur supports-[backdrop-filter]:bg-white/80 supports-[backdrop-filter]:dark:bg-neutral-900/80">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-neutral-700 dark:to-neutral-700 flex items-center justify-center overflow-hidden shadow-inner"
-              style={{ outline: `3px solid ${secondary}` }}
-            >
-              {church.logoUrl ? (
-                <img src={church.logoUrl} alt={church.name} className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-sm font-bold" style={{ color: primary }}>
-                  {getAcronym(church.name)}
-                </span>
-              )}
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+      {/* Menu latéral - Version desktop */}
+      <div className="hidden md:flex flex-col w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
+              CMB
             </div>
             <div>
-              <h1 className="text-xl font-bold leading-tight text-gray-900 dark:text-gray-100">Annonces — {church.name}</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{church.location}</p>
+              <h1 className="font-bold">Centre Miss. de Binza</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Tableau de bord</p>
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-3">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+          {navItems.map((item) => (
             <Link
-              href={`/master/dashboard`}
-              className="px-4 py-2 rounded-lg border text-sm font-medium transition-colors shadow-sm flex items-center gap-2
-                        border-gray-300 hover:bg-gray-50
-                        dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+              key={item.path}
+              href={item.path}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                pathname === item.path
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
             >
-              ← Tableau de bord
+              <span className="text-lg">{item.icon}</span>
+              <span>{item.name}</span>
             </Link>
-            <button
-              onClick={() => setOpenModal(true)}
-              className="px-4 py-2 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all"
-              style={{ backgroundColor: primary, boxShadow: `0 4px 14px -2px ${primary}80` }}
-            >
-              + Nouvelle annonce
-            </button>
-          </div>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            <FiLogOut />
+            <span>Déconnexion</span>
+          </button>
         </div>
       </div>
 
-      {/* Barre d’outils */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="rounded-2xl p-4 bg-white border border-gray-200 shadow-[0_1px_2px_rgba(0,0,0,0.04)]
-                        dark:bg-neutral-900 dark:border-neutral-800">
-          <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between">
-            <div className="flex-1 flex flex-wrap gap-3">
-              <input
-                value={q}
-                onChange={(e) => { setQ(e.target.value); setPage(1); }}
-                placeholder="Rechercher une annonce…"
-                className="w-full md:w-80 rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800
-                           px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500
-                           focus:outline-none focus:ring-2 focus:ring-offset-0"
-                style={{ outlineColor: primary }}
-              />
-              <select
-                value={status}
-                onChange={(e) => { setStatus(e.target.value as any); setPage(1); }}
-                className="rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800
-                           px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-              >
-                <option value="all">Tous les statuts</option>
-                <option value="active">Actives</option>
-                <option value="scheduled">Planifiées</option>
-                <option value="expired">Expirées</option>
-                <option value="draft">Brouillons</option>
-              </select>
-              <select
-                value={category}
-                onChange={(e) => { setCategory(e.target.value as any); setPage(1); }}
-                className="rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800
-                           px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-              >
-                <option value="all">Toutes catégories</option>
-                <option value="collecte">Collecte</option>
-                <option value="programme">Programme</option>
-                <option value="info">Information</option>
-                <option value="autre">Autre</option>
-              </select>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800
-                           px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-              >
-                <option value="created_desc">Création (récent → ancien)</option>
-                <option value="created_asc">Création (ancien → récent)</option>
-                <option value="start_desc">Début (récent → ancien)</option>
-                <option value="start_asc">Début (ancien → récent)</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setOpenModal(true)}
-                className="px-3 py-2 rounded-lg text-white text-sm font-medium shadow-md hover:shadow-lg transition-all"
-                style={{ backgroundColor: primary }}
-              >
-                + Ajouter
+      {/* Menu mobile */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg md:hidden"
+          >
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
+                  CMB
+                </div>
+                <h1 className="font-bold">Centre Missionnaire</h1>
+              </div>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-1">
+                <FiX className="text-xl" />
               </button>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Liste */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10 pt-6">
-        {pageItems.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700
-                          bg-white/50 dark:bg-neutral-900/50">
-            <p className="text-gray-700 dark:text-gray-300">Aucune annonce trouvée.</p>
-            <button
-              onClick={() => setOpenModal(true)}
-              className="mt-4 px-4 py-2 rounded-lg text-white font-medium"
-              style={{ backgroundColor: primary }}
-            >
-              Créer une annonce
-            </button>
-          </div>
-        ) : (
-          <motion.ul
-            initial="hidden"
-            animate="visible"
-            variants={containerStagger}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5"
-          >
-            {pageItems.map((a, i) => {
-              const s = computeStatus(a);
-              const badge =
-                s === 'active'
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                  : s === 'scheduled'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                  : s === 'expired'
-                  ? 'bg-gray-200 text-gray-700 dark:bg-neutral-800 dark:text-gray-300'
-                  : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300';
-
-              return (
-                <motion.li
-                  key={a.id}
-                  variants={fadeIn}
-                  custom={i}
-                  className="rounded-2xl p-5 bg-white border border-gray-200 hover:shadow-md transition-all
-                             dark:bg-neutral-900 dark:border-neutral-800 relative"
+            <nav className="p-4 space-y-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                    pathname === item.path
+                      ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
                 >
-                  {a.pinned && (
-                    <span className="absolute top-3 right-3 text-[10px] px-2 py-0.5 rounded-full text-white"
-                          style={{ backgroundColor: primary }}>
-                      📌 Épinglée
-                    </span>
-                  )}
+                  <span className="text-lg">{item.icon}</span>
+                  <span>{item.name}</span>
+                </Link>
+              ))}
+            </nav>
 
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30">
-                      <span className="text-blue-600 dark:text-blue-300">📢</span>
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                <FiLogOut />
+                <span>Déconnexion</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Contenu principal */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between px-6 py-4">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 rounded-lg md:hidden hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <FiMenu className="text-xl" />
+            </button>
+
+            <div className="flex-1 md:ml-6">
+              <h1 className="text-xl font-semibold">Annonces</h1>
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                  <FiUser className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="hidden md:inline">Admin</span>
+                <FiChevronDown className={`transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isProfileMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10"
+                  >
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <p className="font-medium">Admin</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">admin@eglise.com</p>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">{a.title}</h3>
-                      {a.excerpt && <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">{a.excerpt}</p>}
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <span className={`text-[11px] px-2 py-0.5 rounded-full ${badge}`}>
-                          {s === 'active' ? 'Active' : s === 'scheduled' ? 'Planifiée' : s === 'expired' ? 'Expirée' : 'Brouillon'}
-                        </span>
-                        {a.category && (
-                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-700">
-                            #{a.category}
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        Créée {fmtDateLong(a.createdAt)}
-                        {a.startAt && <> • Début {fmtDateLong(a.startAt)}</>}
-                        {a.endAt && <> • Fin {fmtDateLong(a.endAt)}</>}
-                      </p>
+                    <div className="p-1">
+                      <Link
+                        href="/master/dashboard/profile"
+                        className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                      >
+                        <FiUser className="mr-2" />
+                        Mon profil
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-red-600 dark:text-red-400"
+                      >
+                        <FiLogOut className="mr-2" />
+                        Déconnexion
+                      </button>
                     </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </header>
+
+        {/* Contenu */}
+        <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto">
+            {/* En-tête et actions */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <div>
+                <h2 className="text-2xl font-bold">Gestion des annonces</h2>
+                <p className="text-gray-500 dark:text-gray-400">Communiqués, cultes et événements</p>
+              </div>
+              <div className="flex gap-3">
+                <Link 
+                  href="/master/dashboard/announcements/new" 
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <FiPlus />
+                  <span>Nouvelle annonce</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Recherche et filtres */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiSearch className="text-gray-400" />
                   </div>
+                  <input
+                    type="text"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Rechercher une annonce..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
 
-                  <div className="mt-4 flex items-center justify-between">
-                    <Link
-                      href={`/master/dashboard`} // remplace par un détail si tu crées la page de détail d’annonce
-                      className="text-sm font-medium px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
-                      style={{ color: primary }}
+              {/* Onglets */}
+              <div className="mt-6 border-b border-gray-200 dark:border-gray-700">
+                <nav className="flex flex-wrap -mb-px">
+                  {announcementTypes.map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => setActiveTab(type.id)}
+                      className={`mr-8 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                        activeTab === type.id
+                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                      }`}
                     >
-                      Ouvrir
-                    </Link>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => togglePin(a.id)}
-                        className="text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
-                        title={a.pinned ? 'Désépingler' : 'Épingler'}
-                      >
-                        {a.pinned ? 'Retirer 📌' : 'Épingler 📌'}
-                      </button>
-                      <button
-                        onClick={() => togglePublish(a.id)}
-                        className="text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
-                      >
-                        {a.published ? 'Dépublier' : 'Publier'}
-                      </button>
-                      <button
-                        className="text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
-                        title="Éditer (bientôt)"
-                      >
-                        Éditer
-                      </button>
-                      <button
-                        onClick={() => remove(a.id)}
-                        className="text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
-                      >
-                        Supprimer
-                      </button>
+                      {type.name}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </div>
+
+            {/* Liste des annonces */}
+            <div className="space-y-4">
+              {filteredAnnouncements.length > 0 ? (
+                filteredAnnouncements.map((announcement) => (
+                  <div 
+                    key={announcement.id} 
+                    className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border ${
+                      announcement.status === 'active'
+                        ? 'border-blue-200 dark:border-blue-900/50'
+                        : 'border-gray-200 dark:border-gray-700'
+                    } overflow-hidden`}
+                  >
+                    <div className="p-6">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              announcement.type === 'worship'
+                                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-400'
+                                : announcement.type === 'event'
+                                ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-400'
+                                : announcement.type === 'meeting'
+                                ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-400'
+                                : 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-400'
+                            }`}>
+                              {announcement.type === 'worship' ? 'Culte' : 
+                               announcement.type === 'event' ? 'Événement' : 
+                               announcement.type === 'meeting' ? 'Réunion' : 'Communiqué'}
+                            </span>
+                            {announcement.status === 'active' && (
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-400">
+                                Actif
+                              </span>
+                            )}
+                            {announcement.status === 'expired' && (
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                Expiré
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="mt-2 text-lg font-semibold">{announcement.title}</h3>
+                          <p className="mt-1 text-gray-600 dark:text-gray-300">{announcement.content}</p>
+                        </div>
+                        <div className="mt-4 md:mt-0 md:ml-4 flex items-center space-x-3">
+                          <button className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg">
+                            <FiEdit2 />
+                          </button>
+                          <button className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <FiClock className="mr-1" />
+                        <span>
+                          {announcement.status === 'active' 
+                            ? `Programmé pour le ${announcement.scheduledDate}` 
+                            : `A eu lieu le ${announcement.scheduledDate}`}
+                        </span>
+                        <span className="mx-2">•</span>
+                        <span>Publié le {announcement.date}</span>
+                      </div>
                     </div>
                   </div>
-                </motion.li>
-              );
-            })}
-          </motion.ul>
-        )}
+                ))
+              ) : (
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+                  <p className="text-gray-500 dark:text-gray-400">Aucune annonce trouvée</p>
+                </div>
+              )}
+            </div>
 
-        {/* Pagination */}
-        {filtered.length > pageSize && (
-          <div className="mt-8 flex items-center justify-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="px-3 py-1 rounded-md border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
-            >
-              Précédent
-            </button>
-            <span className="text-sm text-gray-600 dark:text-gray-300">
-              Page {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="px-3 py-1 rounded-md border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
-            >
-              Suivant
-            </button>
+            {/* Pagination */}
+            {filteredAnnouncements.length > 0 && (
+              <div className="mt-6 flex items-center justify-between">
+                <button 
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  disabled
+                >
+                  Précédent
+                </button>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Page 1 sur 1
+                </div>
+                <button 
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  disabled
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
-      {/* Modale de création */}
-      {openModal && (
-        <CreateAnnouncementModal
-          onClose={() => setOpenModal(false)}
-          form={form}
-          setForm={setForm}
-          onCreate={addAnnouncement}
-          primary={primary}
-        />
-      )}
-    </main>
-  );
-}
-
-/* ===================== Modale ===================== */
-function CreateAnnouncementModal({
-  onClose,
-  form,
-  setForm,
-  onCreate,
-  primary,
-}: {
-  onClose: () => void;
-  form: Omit<AnnouncementItem, 'id'>;
-  setForm: React.Dispatch<React.SetStateAction<Omit<AnnouncementItem, 'id'>>>;
-  onCreate: () => void;
-  primary: string;
-}) {
-  const canSubmit = form.title.trim().length > 2;
-
-  return (
-    <div className="fixed inset-0 z-50 p-4 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-2xl rounded-2xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 shadow-xl">
-        <div className="p-5 border-b border-gray-200 dark:border-neutral-800 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Nouvelle annonce</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">✕</button>
-        </div>
-
-        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <label className="text-sm text-gray-600 dark:text-gray-300">Titre</label>
-            <input
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="text-sm text-gray-600 dark:text-gray-300">Résumé (court)</label>
-            <input
-              value={form.excerpt}
-              onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="text-sm text-gray-600 dark:text-gray-300">Contenu</label>
-            <textarea
-              rows={5}
-              value={form.content}
-              onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 dark:text-gray-300">Début (optionnel)</label>
-            <input
-              type="datetime-local"
-              value={form.startAt ? form.startAt.slice(0, 16) : ''}
-              onChange={(e) => setForm((f) => ({ ...f, startAt: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
-              className="mt-1 w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-gray-600 dark:text-gray-300">Fin (optionnel)</label>
-            <input
-              type="datetime-local"
-              value={form.endAt ? form.endAt.slice(0, 16) : ''}
-              onChange={(e) => setForm((f) => ({ ...f, endAt: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
-              className="mt-1 w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 dark:text-gray-300">Catégorie</label>
-            <select
-              value={form.category}
-              onChange={(e) => setForm((f) => ({ ...f, category: e.target.value as any }))}
-              className="mt-1 w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            >
-              <option value="collecte">Collecte</option>
-              <option value="programme">Programme</option>
-              <option value="info">Information</option>
-              <option value="autre">Autre</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm text-gray-600 dark:text-gray-300">Audience</label>
-            <select
-              value={form.audience}
-              onChange={(e) => setForm((f) => ({ ...f, audience: e.target.value as any }))}
-              className="mt-1 w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            >
-              <option value="all">Toute l’église</option>
-              <option value="youth">Jeunesse</option>
-              <option value="choir">Chorale</option>
-              <option value="workers">Serviteurs</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-4 md:col-span-2">
-            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-              <input
-                type="checkbox"
-                checked={form.published}
-                onChange={(e) => setForm((f) => ({ ...f, published: e.target.checked }))}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:bg-neutral-800 dark:border-neutral-700"
-              />
-              Publier immédiatement
-            </label>
-            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-              <input
-                type="checkbox"
-                checked={form.pinned}
-                onChange={(e) => setForm((f) => ({ ...f, pinned: e.target.checked }))}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:bg-neutral-800 dark:border-neutral-700"
-              />
-              Épingler en haut
-            </label>
-          </div>
-        </div>
-
-        <div className="p-5 border-t border-gray-200 dark:border-neutral-800 flex items-center justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800 text-sm"
-          >
-            Annuler
-          </button>
-          <button
-            disabled={!canSubmit}
-            onClick={onCreate}
-            className="px-4 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-60"
-            style={{ backgroundColor: primary }}
-          >
-            Créer
-          </button>
-        </div>
+        </main>
       </div>
     </div>
   );
