@@ -1,701 +1,190 @@
-// app/master/dashboard/sermons/page.tsx
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { 
-  FiHome, FiCalendar, FiBook, FiMic, FiBell, FiUsers, FiDollarSign, FiSettings, 
-  FiLogOut, FiUser, FiChevronDown, FiMenu, FiX, FiPlus, FiSearch, FiEdit, 
-  FiTrash2, FiFilter, FiDownload, FiPrinter, FiFileText, FiBookOpen, FiUpload, FiMapPin, FiClock
-} from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { FiPlus, FiSearch, FiFilter, FiDownload, FiPlay, FiEdit, FiTrash2 } from 'react-icons/fi';
 
 export default function SermonsPage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
-  const pathname = usePathname();
-
-  // État pour le formulaire d'ajout
-  const [newSermon, setNewSermon] = useState({
-    title: '',
-    author: '',
-    location: '',
-    date: new Date().toISOString().split('T')[0],
-    time: 'morning',
-    content: '',
-    tags: [] as string[],
-    file: null as File | null
-  });
-
-  // Données fictives des sermons
-  const [sermons, setSermons] = useState([
-    {
-      id: 1,
-      title: 'La puissance de la résurrection',
-      author: 'Pasteur Jean Kabasele',
-      location: 'Centre Missionnaire de Binza',
-      date: '2023-04-16',
-      time: 'morning',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Résurrection', 'Pâques'],
-      downloads: 124,
-      fileType: 'PDF'
-    },
-    {
-      id: 2,
-      title: 'Vivre par la foi',
-      author: 'Apôtre David Mbaya',
-      location: 'Convention Nationale',
-      date: '2023-03-05',
-      time: 'evening',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Foi', 'Persévérance'],
-      downloads: 89,
-      fileType: 'DOCX'
-    },
-    {
-      id: 3,
-      title: 'Les clés du succès spirituel',
-      author: 'Prophète Samuel Lukusa',
-      location: 'Retraite des leaders',
-      date: '2023-02-12',
-      time: 'morning',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Succès', 'Spiritualité'],
-      downloads: 156,
-      fileType: 'PDF'
-    },
-    {
-      id: 4,
-      title: 'La grâce suffisante',
-      author: 'Dr. Paul Mukendi',
-      location: 'Université Biblique',
-      date: '2023-01-08',
-      time: 'evening',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Grâce', 'Salut'],
-      downloads: 72,
-      fileType: 'PDF'
-    },
-    {
-      id: 5,
-      title: 'Le réveil de l\'Église',
-      author: 'Évangéliste Sarah Ngalula',
-      location: 'Campagne d\'évangélisation',
-      date: '2022-12-25',
-      time: 'morning',
-      content: 'Lorem ipsum dolor sit amet...',
-      tags: ['Réveil', 'Évangélisation'],
-      downloads: 203,
-      fileType: 'VIDEO'
-    }
-  ]);
-
-  const navItems = [
-    { name: 'Accueil', icon: <FiHome />, path: '/master/dashboard' },
-    { name: 'Événements', icon: <FiCalendar />, path: '/master/dashboard/programmes' },
-    { name: 'Sermons', icon: <FiBook />, path: '/master/dashboard/sermons' },
-    { name: 'Prédications', icon: <FiMic />, path: '/master/dashboard/preachings' },
-    { name: 'Annonces', icon: <FiBell />, path: '/master/dashboard/announcements' },
-    { name: 'Membres', icon: <FiUsers />, path: '/master/dashboard/members' },
-    { name: 'Finances', icon: <FiDollarSign />, path: '/master/dashboard/finances' },
-    { name: 'Paramètres', icon: <FiSettings />, path: '/master/dashboard/settings' },
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  const sermons = [
+    { id: 1, title: 'La puissance de la foi', preacher: 'Pasteur John Doe', date: '12 juin 2023', duration: '45:12', category: 'doctrine', listens: 1245 },
+    { id: 2, title: 'La grâce divine', preacher: 'Pasteur Jane Smith', date: '5 juin 2023', duration: '38:45', category: 'spiritualité', listens: 987 },
+    { id: 3, title: 'Vivre dans la sanctification', preacher: 'Pasteur John Doe', date: '29 mai 2023', duration: '52:30', category: 'vie pratique', listens: 1567 },
+    { id: 4, title: 'Le don de prophétie', preacher: 'Pasteur Paul Martin', date: '22 mai 2023', duration: '41:15', category: 'doctrine', listens: 876 },
+    { id: 5, title: 'La prière efficace', preacher: 'Pasteur Jane Smith', date: '15 mai 2023', duration: '36:20', category: 'spiritualité', listens: 1342 },
   ];
 
-  const handleLogout = () => {
-    console.log('Déconnexion effectuée');
-    // Ajoutez ici votre logique de déconnexion
-  };
-
-  const handleAddSermon = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newId = sermons.length > 0 ? Math.max(...sermons.map(s => s.id)) + 1 : 1;
-    
-    setSermons([
-      ...sermons,
-      {
-        id: newId,
-        ...newSermon,
-        downloads: 0,
-        fileType: newSermon.file?.name.split('.').pop()?.toUpperCase() || 'PDF'
-      }
-    ]);
-    
-    // Réinitialiser le formulaire
-    setNewSermon({
-      title: '',
-      author: '',
-      location: '',
-      date: new Date().toISOString().split('T')[0],
-      time: 'morning',
-      content: '',
-      tags: [],
-      file: null
-    });
-    
-    setIsAddModalOpen(false);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setNewSermon({
-        ...newSermon,
-        file: e.target.files[0]
-      });
-    }
-  };
-
-  const handleDeleteSermon = (id: number) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce sermon ?')) {
-      setSermons(sermons.filter(s => s.id !== id));
-    }
-  };
-
-  const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-      setNewSermon({
-        ...newSermon,
-        tags: [...newSermon.tags, e.currentTarget.value.trim()],
-      });
-      e.currentTarget.value = '';
-    }
-  };
-
-  const removeTag = (index: number) => {
-    setNewSermon({
-      ...newSermon,
-      tags: newSermon.tags.filter((_, i) => i !== index),
-    });
-  };
-
-  const filteredSermons = sermons.filter(sermon => {
-    // Filtre par recherche
-    const matchesSearch = 
-      sermon.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sermon.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sermon.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    // Filtre par type
-    const matchesFilter = 
-      activeFilter === 'all' || 
-      sermon.fileType === activeFilter.toUpperCase();
-    
-    return matchesSearch && matchesFilter;
-  });
-
-  const fileTypeClasses = {
-    PDF: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400',
-    DOCX: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400',
-    VIDEO: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-400'
-  };
+  const categories = [
+    { value: 'all', label: 'Tous les sermons' },
+    { value: 'doctrine', label: 'Doctrine' },
+    {value: 'spiritualité', label: 'Spiritualité' },
+    { value: 'vie pratique', label: 'Vie pratique' },
+    { value: 'évangélisation', label: 'Évangélisation' },
+  ];
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-      {/* Menu latéral - Version desktop */}
-      <div className="hidden md:flex flex-col w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
-              CMB
-            </div>
-            <div>
-              <h1 className="font-bold">Centre Miss. de Binza</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Tableau de bord</p>
-            </div>
-          </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sermons</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Gérez et organisez vos sermons</p>
         </div>
-
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                pathname === item.path
-                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              <span className="text-lg">{item.icon}</span>
-              <span>{item.name}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-          >
-            <FiLogOut />
-            <span>Déconnexion</span>
-          </button>
-        </div>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+        >
+          <FiPlus className="text-lg" />
+          <span>Nouveau sermon</span>
+        </motion.button>
       </div>
 
-      {/* Contenu principal */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between px-6 py-4">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 rounded-lg md:hidden hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <FiMenu className="text-xl" />
-            </button>
-
-            <div className="flex-1 md:ml-6">
-              <h1 className="text-xl font-semibold">Sermons & Littérature</h1>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="h-5 w-5 text-gray-400" />
             </div>
-
-            <div className="relative">
-              <button
-                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                  <FiUser className="text-blue-600 dark:text-blue-400" />
-                </div>
-                <span className="hidden md:inline">Admin</span>
-                <FiChevronDown className={`transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {isProfileMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10"
-                  >
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                      <p className="font-medium">Admin</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">admin@eglise.com</p>
-                    </div>
-                    <div className="p-1">
-                      <Link
-                        href="/master/dashboard/profile"
-                        className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                      >
-                        <FiUser className="mr-2" />
-                        Mon profil
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-red-600 dark:text-red-400"
-                      >
-                        <FiLogOut className="mr-2" />
-                        Déconnexion
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <input
+              type="text"
+              placeholder="Rechercher un sermon..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:text-white"
+            />
           </div>
-        </header>
+          <div className="flex gap-2">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:text-white"
+            >
+              {categories.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300"
+            >
+              <FiFilter className="text-lg" />
+            </motion.button>
+          </div>
+        </div>
 
-        {/* Contenu */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900">
-          <div className="max-w-7xl mx-auto">
-            {/* Barre d'actions */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiSearch className="text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Rechercher un sermon..."
-                    className="pl-10 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                
-                <div className="relative">
-                  <select
-                    value={activeFilter}
-                    onChange={(e) => setActiveFilter(e.target.value)}
-                    className="appearance-none pl-3 pr-8 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  >
-                    <option value="all">Tous les types</option>
-                    <option value="pdf">PDF</option>
-                    <option value="docx">DOCX</option>
-                    <option value="video">VIDÉO</option>
-                  </select>
-                  <FiFilter className="absolute right-3 top-3 text-gray-400" />
-                </div>
-              </div>
-              
-              <div className="flex space-x-3">
-                <button className="flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                  <FiDownload className="mr-2" />
-                  Exporter
-                </button>
-                <button className="flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                  <FiPrinter className="mr-2" />
-                  Imprimer
-                </button>
-                <button
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead>
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Titre</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Prédicateur</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Durée</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Écoutes</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {sermons.map((sermon) => (
+                <motion.tr 
+                  key={sermon.id} 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 >
-                  <FiPlus className="mr-2" />
-                  Ajouter un sermon
-                </button>
-              </div>
-            </div>
-
-            {/* Statistiques */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Total sermons</p>
-                    <p className="text-2xl font-semibold">{sermons.length}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
-                    <FiBook className="text-xl" />
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Sermons PDF</p>
-                    <p className="text-2xl font-semibold">{sermons.filter(s => s.fileType === 'PDF').length}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400">
-                    <FiFileText className="text-xl" />
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Sermons DOCX</p>
-                    <p className="text-2xl font-semibold">{sermons.filter(s => s.fileType === 'DOCX').length}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
-                    <FiFileText className="text-xl" />
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Sermons VIDÉO</p>
-                    <p className="text-2xl font-semibold">{sermons.filter(s => s.fileType === 'VIDEO').length}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400">
-                    <FiBookOpen className="text-xl" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Liste des sermons */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Titre
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Auteur
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Lieu & Date
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Mots-clés
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Type
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Téléchargements
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredSermons.length > 0 ? (
-                      filteredSermons.map((sermon) => (
-                        <tr key={sermon.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium">
-                              {sermon.title}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-gray-200">{sermon.author}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-gray-200">{sermon.location}</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {new Date(sermon.date).toLocaleDateString('fr-FR')} • {sermon.time === 'morning' ? 'Matin' : 'Soir'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex flex-wrap gap-1">
-                              {sermon.tags.map((tag, idx) => (
-                                <span key={idx} className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${fileTypeClasses[sermon.fileType as keyof typeof fileTypeClasses]}`}>
-                              {sermon.fileType}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {sermon.downloads}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                            <div className="flex justify-end space-x-2">
-                              <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1">
-                                <FiEdit />
-                              </button>
-                              <button 
-                                onClick={() => handleDeleteSermon(sermon.id)}
-                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1"
-                              >
-                                <FiTrash2 />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                          Aucun sermon trouvé
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-
-      {/* Modal d'ajout */}
-      <AnimatePresence>
-        {isAddModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
-            >
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Ajouter un nouveau sermon</h2>
-                  <button
-                    onClick={() => setIsAddModalOpen(false)}
-                    className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                  >
-                    <FiX className="text-xl" />
-                  </button>
-                </div>
-
-                <form onSubmit={handleAddSermon}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Titre de l'ouvrage *
-                      </label>
-                      <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        required
-                        value={newSermon.title}
-                        onChange={(e) => setNewSermon({...newSermon, title: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <FiPlay />
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{sermon.title}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">{sermon.category}</div>
+                      </div>
                     </div>
-
-                    <div>
-                      <label htmlFor="author" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Auteur *
-                      </label>
-                      <input
-                        type="text"
-                        id="author"
-                        name="author"
-                        required
-                        value={newSermon.author}
-                        onChange={(e) => setNewSermon({...newSermon, author: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Lieu *
-                      </label>
-                      <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        required
-                        value={newSermon.location}
-                        onChange={(e) => setNewSermon({...newSermon, location: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Date *
-                      </label>
-                      <input
-                        type="date"
-                        id="date"
-                        name="date"
-                        required
-                        value={newSermon.date}
-                        onChange={(e) => setNewSermon({...newSermon, date: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Moment *
-                      </label>
-                      <select
-                        id="time"
-                        name="time"
-                        required
-                        value={newSermon.time}
-                        onChange={(e) => setNewSermon({...newSermon, time: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{sermon.preacher}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{sermon.date}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{sermon.duration}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{sermon.listens.toLocaleString()}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm">
+                    <div className="flex items-center space-x-2">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                       >
-                        <option value="morning">Matin</option>
-                        <option value="evening">Soir</option>
-                      </select>
+                        <FiEdit className="text-lg" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                      >
+                        <FiDownload className="text-lg" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                      >
+                        <FiTrash2 className="text-lg" />
+                      </motion.button>
                     </div>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-                    <div className="md:col-span-2">
-                      <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Mots-clés
-                      </label>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {newSermon.tags.map((tag, index) => (
-                          <span 
-                            key={index} 
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-400"
-                          >
-                            {tag}
-                            <button 
-                              type="button"
-                              onClick={() => removeTag(index)}
-                              className="ml-1.5 inline-flex text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 focus:outline-none"
-                            >
-                              &times;
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <input
-                        type="text"
-                        id="tags"
-                        placeholder="Appuyez sur Entrée pour ajouter un mot-clé"
-                        onKeyDown={handleTagInput}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Contenu ou description
-                      </label>
-                      <textarea
-                        id="content"
-                        name="content"
-                        rows={4}
-                        value={newSermon.content}
-                        onChange={(e) => setNewSermon({...newSermon, content: e.target.value})}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Fichier *
-                      </label>
-                      <div className="flex items-center">
-                        <label className="flex flex-col items-center justify-center w-full py-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600">
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <FiUpload className="mb-3 text-gray-400 text-xl" />
-                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                              <span className="font-semibold">Cliquez pour uploader</span> ou glissez-déposez
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              PDF, DOCX, MP4 (MAX. 50MB)
-                            </p>
-                          </div>
-                          <input 
-                            id="file" 
-                            name="file" 
-                            type="file" 
-                            accept=".pdf,.docx,.mp4" 
-                            className="hidden" 
-                            required
-                            onChange={handleFileChange}
-                          />
-                        </label>
-                      </div>
-                      {newSermon.file && (
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          Fichier sélectionné: {newSermon.file.name}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddModalOpen(false)}
-                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Enregistrer
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Affichage de <span className="font-medium">1</span> à <span className="font-medium">5</span> sur <span className="font-medium">20</span> sermons
+          </p>
+          <div className="flex space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-3 py-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300"
+            >
+              Précédent
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-3 py-1 bg-blue-600 border border-transparent rounded-md text-sm text-white"
+            >
+              1
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-3 py-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300"
+            >
+              2
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-3 py-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300"
+            >
+              Suivant
+            </motion.button>
           </div>
-        )}
-      </AnimatePresence>
-    </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
