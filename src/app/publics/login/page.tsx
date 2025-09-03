@@ -38,7 +38,7 @@ export default function LoginPage() {
       }
 
       // Si tout est valide, rediriger vers le dashboard
-      router.push('/master/dashboard');
+      router.push('/master');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {
@@ -174,7 +174,7 @@ export default function LoginPage() {
 
             <div>
               <Link
-                  href="/master/dashboard"
+                  href="/master"
                   className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300"
                 >
               <button
