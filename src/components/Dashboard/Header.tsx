@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface HeaderProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
-  navItems: Array<{ name: string; path: string }>;
+  navItems?: Array<{ name: string; path: string }>;
 }
 
 export default function Header({ setIsMobileMenuOpen, navItems }: HeaderProps) {

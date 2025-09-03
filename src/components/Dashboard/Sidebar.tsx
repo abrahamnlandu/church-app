@@ -4,25 +4,30 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiHome, FiCalendar, FiBook, FiMic, FiBell, FiUsers, FiDollarSign, FiSettings, FiLogOut, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { getNavItems } from '@/app/constants/userRoutes';
+import { USER_TYPES, UserType } from '@/app/constants/userTypes';
+import { JSX } from 'react';
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
+  userType: UserType;
 }
 
-export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) {
-  const pathname = usePathname();
+const iconMap: { [key: string]: JSX.Element } = {
+  FiHome: <FiHome />,
+  FiCalendar: <FiCalendar />,
+  FiBook: <FiBook />,
+  FiMic: <FiMic />,
+  FiBell: <FiBell />,
+  FiUsers: <FiUsers />,
+  FiDollarSign: <FiDollarSign />,
+  FiSettings: <FiSettings />,
+};
 
-  const navItems = [
-    { name: 'Accueil', icon: <FiHome />, path: '/master/dashboard' },
-    { name: 'Événements', icon: <FiCalendar />, path: '/master/dashboard/programmes' },
-    { name: 'Sermons', icon: <FiBook />, path: '/master/dashboard/sermons' },
-    { name: 'Prédications', icon: <FiMic />, path: '/master/dashboard/preachings' },
-    { name: 'Annonces', icon: <FiBell />, path: '/master/dashboard/announcements' },
-    { name: 'Membres', icon: <FiUsers />, path: '/master/dashboard/members' },
-    { name: 'Finances', icon: <FiDollarSign />, path: '/master/dashboard/finances' },
-    { name: 'Paramètres', icon: <FiSettings />, path: '/master/dashboard/settings' },
-  ];
+export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, userType }: SidebarProps) {
+  const pathname = usePathname();
+  const navItems = getNavItems(USER_TYPES[userType]); 
 
   const handleLogout = () => {
     console.log('Déconnexion effectuée');
@@ -72,7 +77,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
                   animate={{ rotate: pathname === item.path ? [0, 5, 0] : 0 }}
                   className="text-lg"
                 >
-                  {item.icon}
+                  {iconMap[item.iconName]}
                 </motion.span>
                 <span className="font-medium">{item.name}</span>
               </Link>
@@ -145,7 +150,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-lg">{iconMap[item.iconName]}</span>
                   <span className="font-medium">{item.name}</span>
                 </Link>
               </motion.div>
