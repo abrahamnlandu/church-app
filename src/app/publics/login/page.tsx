@@ -38,7 +38,7 @@ export default function LoginPage() {
       }
 
       // Si tout est valide, rediriger vers le dashboard
-      router.push('/master/dashboard');
+      router.push('/master');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {
@@ -57,7 +57,7 @@ export default function LoginPage() {
           className="max-w-md text-center"
         >
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Centre Missionnaire</h1>
+            <h1 className="text-4xl font-bold mb-2">Church App</h1>
             <p className="text-blue-100 dark:text-blue-300">Plateforme de gestion ecclésiastique</p>
           </div>
           
@@ -173,14 +173,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <Link
-                  href="/master/dashboard"
-                  className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300"
-                >
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-all ${
+                className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-gray-900 transition-all ${
                   isLoading
                     ? 'bg-blue-400 dark:bg-blue-700 cursor-not-allowed'
                     : 'bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-800'
@@ -195,10 +191,9 @@ export default function LoginPage() {
                     Connexion en cours...
                   </>
                 ) : (
-                  'Se connecter'
+                  'Accéder au dashboard'
                 )}
               </button>
-              </Link>
             </div>
           </form>
 

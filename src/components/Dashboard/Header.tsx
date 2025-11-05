@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface HeaderProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
-  navItems: Array<{ name: string; path: string }>;
+  navItems?: Array<{ name: string; path: string }>;
 }
 
 export default function Header({ setIsMobileMenuOpen, navItems }: HeaderProps) {
@@ -25,9 +25,9 @@ export default function Header({ setIsMobileMenuOpen, navItems }: HeaderProps) {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm"
+      className="w-full bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm"
     >
-      <div className="flex items-center justify-between px-6 py-3">
+      <div className="w-full flex items-center justify-between px-6 py-3">
         <div className="flex items-center space-x-4">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -37,12 +37,10 @@ export default function Header({ setIsMobileMenuOpen, navItems }: HeaderProps) {
           >
             <FiMenu className="text-xl" />
           </motion.button>
-
-          
         </div>
 
-        <div className="flex-1 max-w-xl mx-4">
-          <div className="relative">
+        <div className="flex-1 max-w-2xl mx-4 w-full">
+          <div className="relative w-full">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiSearch className="h-5 w-5 text-gray-400" />
             </div>
@@ -104,7 +102,7 @@ export default function Header({ setIsMobileMenuOpen, navItems }: HeaderProps) {
                   </div>
                   <div className="p-2">
                     <Link
-                      href="/master/dashboard/profile"
+                      href="/master/profile"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors duration-200"
                       onClick={() => setIsProfileMenuOpen(false)}
                     >

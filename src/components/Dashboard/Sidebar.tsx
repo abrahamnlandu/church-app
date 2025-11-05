@@ -3,26 +3,31 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiHome, FiCalendar, FiBook, FiMic, FiBell, FiUsers, FiDollarSign, FiSettings, FiLogOut, FiX } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getNavItems } from '@/app/constants/userRoutes';
+import { USER_TYPES, UserType } from '@/app/constants/userTypes';
+import { JSX } from 'react';
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
+  userType: UserType;
 }
 
-export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) {
-  const pathname = usePathname();
+const iconMap: { [key: string]: JSX.Element } = {
+  FiHome: <FiHome />,
+  FiCalendar: <FiCalendar />,
+  FiBook: <FiBook />,
+  FiMic: <FiMic />,
+  FiBell: <FiBell />,
+  FiUsers: <FiUsers />,
+  FiDollarSign: <FiDollarSign />,
+  FiSettings: <FiSettings />,
+};
 
-  const navItems = [
-    { name: 'Accueil', icon: <FiHome />, path: '/master/dashboard' },
-    { name: 'Événements', icon: <FiCalendar />, path: '/master/dashboard/programmes' },
-    { name: 'Sermons', icon: <FiBook />, path: '/master/dashboard/sermons' },
-    { name: 'Prédications', icon: <FiMic />, path: '/master/dashboard/preachings' },
-    { name: 'Annonces', icon: <FiBell />, path: '/master/dashboard/announcements' },
-    { name: 'Membres', icon: <FiUsers />, path: '/master/dashboard/members' },
-    { name: 'Finances', icon: <FiDollarSign />, path: '/master/dashboard/finances' },
-    { name: 'Paramètres', icon: <FiSettings />, path: '/master/dashboard/settings' },
-  ];
+export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, userType }: SidebarProps) {
+  const pathname = usePathname();
+  const navItems = getNavItems(USER_TYPES[userType]); 
 
   const handleLogout = () => {
     console.log('Déconnexion effectuée');
@@ -33,7 +38,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
       {/* Menu latéral - Version desktop */}
       <motion.div 
         initial={{ x: 0 }}
-        className="hidden md:flex flex-col w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-lg"
+        className="hidden md:flex flex-col w-64 h-full border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-lg"
       >
         <motion.div 
           whileHover={{ scale: 1.02 }}
@@ -72,7 +77,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
                   animate={{ rotate: pathname === item.path ? [0, 5, 0] : 0 }}
                   className="text-lg"
                 >
-                  {item.icon}
+                  {iconMap[item.iconName]}
                 </motion.span>
                 <span className="font-medium">{item.name}</span>
               </Link>
@@ -99,73 +104,89 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
         </motion.div>
       </motion.div>
 
-      {/* Menu mobile */}
-      {isMobileMenuOpen && (
-        <motion.div
-          initial={{ x: -300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -300, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-xl md:hidden"
-        >
-          <div className="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 flex justify-between items-center">
-            <motion.div 
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              className="flex items-center space-x-3"
+      {/* Overlay pour mobile */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            />
+            
+            {/* Menu mobile */}
+            <motion.div
+              initial={{ x: -300, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -300, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed inset-y-0 left-0 z-50 w-64 h-full bg-white dark:bg-gray-800 shadow-xl md:hidden"
             >
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                CMB
-              </div>
-              <h1 className="font-bold text-gray-800 dark:text-white">Centre Missionnaire</h1>
-            </motion.div>
-            <motion.button 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setIsMobileMenuOpen(false)} 
-              className="p-1 text-gray-500 dark:text-gray-400"
-            >
-              <FiX className="text-xl" />
-            </motion.button>
-          </div>
-
-          <nav className="p-4 space-y-1">
-            {navItems.map((item) => (
-              <motion.div
-                key={item.path}
-                whileHover={{ x: 5 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-              >
-                <Link
-                  href={item.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                    pathname === item.path
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
+              <div className="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 flex justify-between items-center">
+                <motion.div 
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center space-x-3"
                 >
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="font-medium">{item.name}</span>
-                </Link>
-              </motion.div>
-            ))}
-          </nav>
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                    CMB
+                  </div>
+                  <div>
+                    <h1 className="font-bold text-gray-800 dark:text-white">Centre Miss. de Binza</h1>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Tableau de bord</p>
+                  </div>
+                </motion.div>
+                <motion.button 
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="p-1 text-gray-500 dark:text-gray-400"
+                >
+                  <FiX className="text-xl" />
+                </motion.button>
+              </div>
 
-          <motion.div 
-            whileHover={{ scale: 1.01 }}
-            className="p-4 border-t border-gray-200 dark:border-gray-700"
-          >
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
-            >
-              <FiLogOut />
-              <span>Déconnexion</span>
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
+              <nav className="p-4 space-y-1 h-[calc(100%-140px)] overflow-y-auto">
+                {navItems.map((item) => (
+                  <motion.div
+                    key={item.path}
+                    whileHover={{ x: 5 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <Link
+                      href={item.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                        pathname === item.path
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'
+                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <span className="text-lg">{iconMap[item.iconName]}</span>
+                      <span className="font-medium">{item.name}</span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </nav>
+
+              <motion.div 
+                whileHover={{ scale: 1.01 }}
+                className="p-4 border-t border-gray-200 dark:border-gray-700"
+              >
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
+                >
+                  <FiLogOut />
+                  <span>Déconnexion</span>
+                </button>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

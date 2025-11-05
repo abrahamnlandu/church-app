@@ -497,7 +497,17 @@ export default function ChurchSignupPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Mobile Money
+                      Mobile Money 1
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ex: +243 XX XXX XX XX"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Mobile Money 2
                     </label>
                     <input
                       type="text"
