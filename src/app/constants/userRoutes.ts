@@ -10,7 +10,7 @@ export const getNavItems = (userType: string): NavItem[] => {
   switch (userType) {
     case USER_TYPES.MASTER:
       return [
-        { name: 'Accueil', iconName: 'FiHome', path: '/master' },
+        { name: 'Tableau de bord', iconName: 'FiHome', path: '/master' },
         { name: 'Événements', iconName: 'FiCalendar', path: '/master/programmes' },
         { name: 'Sermons', iconName: 'FiBook', path: '/master/sermons' },
         { name: 'Prédications', iconName: 'FiMic', path: '/master/preachings' },
@@ -23,6 +23,7 @@ export const getNavItems = (userType: string): NavItem[] => {
       return [
         { name: 'Accueil', iconName: 'FiHome', path: '/deacons' },
         { name: 'Membres', iconName: 'FiUsers', path: '/deacons/members' },
+        { name: 'Finances', iconName: 'FiDollarSign', path: '/deacons/members' }, 
       ];
     case USER_TYPES.SUPPORT:
       return [
